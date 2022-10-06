@@ -35,11 +35,3 @@ def write_excel_center(file_path, rang='A1:AE15'):
 def write_excel_file(data, file_path, sheet_name):
     data.to_excel(file_path, sheet_name=sheet_name)
     write_excel_center(file_path)
-
-
-def string_to_date(str):
-    return datetime.date(*map(int, str.split('-')))
-
-
-def get_product_name_from_table(table):
-    return table.iloc[0]['选购商品'].strip()
