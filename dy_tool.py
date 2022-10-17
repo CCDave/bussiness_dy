@@ -43,3 +43,28 @@ def string_to_date(str):
 
 def get_product_name_from_table(table):
     return table.iloc[0]['选购商品'].strip()
+
+
+def get_last_months(count):
+    ret = []
+    now_date_time = datetime.datetime.now()
+    for i in range(0, count):
+        ret.append(now_date_time.date)
+        now_date_time = (now_date_time - datetime.timedelta(days=30))
+        i = i + 1
+    return ret
+
+
+def currency_to_float(e):
+    if isinstance(e, str):
+        return e.replace(',', '')
+    return e
+
+
+def get_sum_size_from_status(orders, order_status, after_status):
+    status = orders[(orders['订单状态'] == order_status) & (
+        orders['售后状态'] == after_status)]
+    if len(status):
+        return status.iloc[0]['sum'], status.iloc[0]['size']
+    else:
+        return 0, 0

@@ -17,6 +17,7 @@ warnings.filterwarnings("ignore")
 
 config = {'订单表名': '订单表.csv',
           '结算表名': '结算表.csv',
+
           '成本表名': '成本表.csv',
           '计算月份': ['2022-08', '2022-09']
           }
@@ -25,6 +26,7 @@ config = {'订单表名': '订单表.csv',
 orders_from_file = {}
 orders_settle_from_file = {}
 orders_cost_from_file = {}
+orders_return_from_file = {}
 
 if '订单表名' in config:
     orders_from_file = pd.read_csv(config['订单表名'])
@@ -50,10 +52,19 @@ if ('计算月份' not in config) or len(config['计算月份']) == 0:
     exit()
 
 
-def Currency_to_float(e):
+def currency_to_float(e):
     if isinstance(e, str):
         return e.replace(',', '')
     return e
+
+
+def get_sum_size_from_status(orders, order_status, after_status):
+    status = orders[(orders['订单状态'] == order_status) & (
+        orders['售后状态'] == after_status)]
+    if len(status):
+        return status.iloc[0]['sum'], status.iloc[0]['size']
+    else:
+        return 0, 0
 
 
 ############################################# 初始化数据 ##################################################
@@ -64,21 +75,12 @@ orders_from_file['订单提交月份'] = pd.to_datetime(
 
 # \ orders_from_file['优惠总金额'] - orders_from_file['红包抵扣']
 orders_from_file['预估收款金额'] = pd.to_numeric(orders_from_file['订单应付金额'].map(
-    lambda x: Currency_to_float(x)), downcast='float')
+    lambda x: currency_to_float(x)), downcast='float')
 
 
 ret = {}
 month_source_data = []
 # 先按月份取出订单
-
-
-def get_sum_size_from_status(orders, order_status, after_status):
-    status = orders[(orders['订单状态'] == order_status) & (
-        orders['售后状态'] == after_status)]
-    if len(status):
-        return status.iloc[0]['sum'], status.iloc[0]['size']
-    else:
-        return 0, 0
 
 
 for month in config['计算月份']:
@@ -330,7 +332,6 @@ for real_data in month_result:
                                            ], index=list(range(len(data_month) + 1)))
 
     for data in data_month:
-
         ret.iloc[index][0] = data['商品ID']
         ret.iloc[index][1] = data['商品名字']
         ret.iloc[index][2] = data['所有订单数']
