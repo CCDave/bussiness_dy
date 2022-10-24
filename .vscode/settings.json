@@ -1,5 +1,16 @@
 {
-    "cSpell.words": [
-        "pymysql"
-    ]
+  "cSpell.words": ["pymysql"],
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "server": "121.41.19.35",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "a",
+      "group": "a",
+      "database": "postgres",
+      "username": "postgres",
+      "password": "SRwHwWnL24kAwsDs"
+    }
+  ]
 }

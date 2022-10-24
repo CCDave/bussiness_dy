@@ -1,6 +1,6 @@
 
 python manage.py migrate
-manage.py makemigrations
+python manage.py makemigrations
 pip install requests
 pip install pandas
-pip install openpyxl
+pip install openpyxl psycopg2 pandas
