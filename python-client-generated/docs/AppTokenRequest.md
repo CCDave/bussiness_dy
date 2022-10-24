@@ -1,0 +1,10 @@
+# AppTokenRequest
+
+## Properties
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**app_id** | **str** | 应用ID | 
+**api_key** | **str** | 应用凭证 | 
+
+[[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
