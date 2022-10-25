@@ -38,8 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'OrdersModel', 
-      
+    'OrdersModel',
+
 ]
 
 MIDDLEWARE = [
@@ -108,13 +108,13 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -128,14 +128,14 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-DATABASES = { 
-    'default': 
-    { 
+DATABASES = {
+    'default':
+    {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',    # 数据库引擎
-        'NAME': 'postgres', # 数据库名称
-        'HOST': '121.41.19.35', # 数据库地址，本机 ip 地址 127.0.0.1 
-        'PORT': 5432, # 端口 
+        'NAME': 'postgres',  # 数据库名称
+        'HOST': '121.41.19.35',  # 数据库地址，本机 ip 地址 127.0.0.1
+        'PORT': 5432,  # 端口
         'USER': 'postgres',  # 数据库用户名
-        'PASSWORD': 'SRwHwWnL24kAwsDs', # 数据库密码
-    }  
+        'PASSWORD': 'SRwHwWnL24kAwsDs',  # 数据库密码
+    }
 }

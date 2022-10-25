@@ -1,4 +1,6 @@
+from bisect import insort
 import datetime
+from decimal import Decimal
 from doctest import FAIL_FAST
 import requests
 import csv
@@ -104,104 +106,158 @@ def safe_keep_ol(data, keeps):
     return data
 
 
-def trans_params(params):
-    if isinstance(params, datetime.datetime):
-        params = str(params)
+def trans_number(params):
+    ret = None
+    try:
+        if isinstance(params, int):
+            ret = params
+        else:
+            ret = pd.to_numeric(params)
+            ret = Decimal(ret).quantize(Decimal('0.00'))
+            # if isinstance(ret, np.float64):
+            #    ret = Decimal(ret)
+            # print(type(ret))
+    except Exception as e:
+        print(e)
+        ret = None
+    if pd.isna(ret):
+        ret = None
+    return ret
+
+
+def trans_string(params):
+    ret = None
+    try:
+        if isinstance(params, str):
+            ret = params
+        else:
+            ret = str(params)
+    except Exception as e:
+        print(e)
+        ret = None
+
+    if isinstance(ret, str):
+        ret = ret.replace('\t', '')
+    if pd.isna(ret) or ret == 'nan':
+        ret = None
+    return ret
+
+
+def trans_time(params):
+    ret = None
+    try:
+        if isinstance(params, datetime.datetime):
+            ret = params
+        elif isinstance(params, str):
+            params = params.replace('\t', '')
+            ret = pd.to_datetime(params)
+        else:
+            ret = pd.to_datetime(params)
+    except Exception as e:
+        print(e)
+        ret = None
 
     if pd.isna(params):
-        params = None
-
-    if isinstance(params, str):
-        params = params.replace('\t', '')
-
-    if params == '-':
-        params = None
-
-    return params
+        ret = None
+    return ret
 
 
-def transol2dict(df):
-    return {'order_id': trans_params(df['子订单编号']),
-            'parent_id': trans_params(df['主订单编号']),
-            'name': trans_params(df['商品名称']),
-            'p_specs': trans_params(df['商品规格']),
-            'p_price': trans_params(df['商品单价']),
-            'payable': trans_params(df['订单应付金额']),
-            'pay_way': trans_params(df['支付方式']),
-            'service_charge': trans_params(df['手续费']),
-            'user_name': trans_params(df['收件人']),
-            'user_phone': trans_params(df['收件人手机号']),
-            'province': trans_params(df['省']),
-            'city': trans_params(df['市']),
-            'area': trans_params(df['区']),
-            'street': trans_params(df['街道']),
-            'detailed_address': trans_params(df['详细地址']),
-            'msg_from_user': trans_params(df['买家留言']),
-            'order_submit_time': trans_params(df['订单提交时间']),
-            'shop_remarks': trans_params(df['商家备注']),
-            'order_finish_time': trans_params(df['订单完成时间']),
-            'order_pay_time': trans_params(df['支付完成时间']),
-            'app_chanel': trans_params(df['APP渠道']),
-            'user_from': trans_params(df['流量来源']),
-            'order_status': trans_params(df['订单状态']),
-            'promised_delivery_time': trans_params(df['承诺发货时间']),
-            'order_type': trans_params(df['订单类型']),
-            'partner_id': trans_params(df['达人ID']),
-            'partner_name': trans_params(df['达人昵称']),
-            'post_sale_status': trans_params(df['售后状态']),
-            'cancel_reason': trans_params(df['取消原因']),
-            'scheduled_delivery_time': trans_params(df['预约发货时间']),
-            'safe_buy': trans_params(df['是否安心购']),
-            'ad_chanel': trans_params(df['广告渠道']),
-            'platform_pay_discount_amount': trans_params(df['平台实际承担优惠金额']),
-            'shop_pay_discount_amount': trans_params(df['商家实际承担优惠金额']),
-            'partner_pay_discount_amount': trans_params(df['达人实际承担优惠金额']),
-            'estimated_delivery_time': trans_params(df['预计送达时间']),
-            'order_submit_month': trans_params(df['订单提交月份']),
-            'order_submit_date': trans_params(df['订单提交日期']),
-            'estimated_collection_amount': trans_params(df['预估收款金额']),
-            'express_delivery_date': trans_params(df['发货日期']),
-            'express_delivery_days': trans_params(df['几天发货']),
-            'post_sale_id': trans_params(df['售后单号']),
-            'post_sale_type': trans_params(df['售后类型']),
-            'post_sale_apply_time': trans_params(df['售后申请时间']),
-            'post_sale_reason': trans_params(df['售后原因']),
-            'post_sale_reason_tag': trans_params(df['售后原因标签']),
-            'return_express_number': trans_params(df['退货物流单号']),
-            'return_delivery_time': trans_params(df['售后申请时间']),
-            'post_sale_apply_agree_time': trans_params(df['售后申请时间']),
-            'shop_refund_time': trans_params(df['售后申请时间']),
-            'user_arrival_time': trans_params(df['售后申请时间']),
-            'post_sale_close_time': trans_params(df['售后申请时间']),
-            'arbitration_status': trans_params(df['仲裁状态']),
-            'responsible': trans_params(df['纠纷责任方']),
-            'post_sale_finish_time': trans_params(df['售后申请时间']),
-            'order_remarks': trans_params(df['订单备注']),
-            'user_post_sale_desc': trans_params(df['用户售后说明']),
-            'after_sale_remarks': trans_params(df['售后备注']),
-            'post_sale_apply_date': trans_params(df['售后申请时间']),
-            'refund_days': trans_params(df['几天退款']),
-            'settle_time': trans_params(df['结算时间']),
-            'settle_amount': trans_params(df['结算金额']),
-            'total_income': trans_params(df['收入合计']),
-            'platform_service_amount': trans_params(df['平台服务费']),
-            'platform_subsidy': trans_params(df['平台补贴']),
-            'partner_subsidy': trans_params(df['达人补贴']),
-            'dy_pay_subsidy': trans_params(df['抖音支付补贴']),
-            'dy_month_subsidy': trans_params(df['抖音月付营销补贴']),
-            'user_total_pay': trans_params(df['用户实付']),
-            'commission': trans_params(df['佣金']),
-            'channel_commission': trans_params(df['渠道分成']),
-            'investment_commission': trans_params(df['招商服务费']),
-            'live_3part_commission': trans_params(df['直播间站外推广']),
-            'other_commission': trans_params(df['其他分成']),
-            'other_commission_desc': trans_params(df['其他分成说明']),
-            'total_expend': trans_params(df['支出合计']),
-            'remark': trans_params(df['备注'])}
+def transOl2dict(df):
+    obj = {}
+    obj['order_id'] = trans_string(df['子订单编号'])
+    obj['parent_id'] = trans_string(df['主订单编号'])
+    obj['name'] = trans_string(df['选购商品'])
+
+    obj['p_id'] = trans_string(df['商品ID'])
+    obj['p_count'] = trans_number(df['商品数量'])
+    p_specs = trans_string(df['商品规格'])
+    obj['p_specs'] = p_specs
+    sku_code = ''
+    if len(p_specs):
+        values = p_specs.split(';')
+        if len(values) == 2:
+            sku_code = values[0]
+        elif len(values) == 3:
+            sku_code = values[0] + '-' + values[1]
+    obj['sku_code'] = sku_code
+    obj['p_price'] = trans_number(df['商品单价'])
+    obj['payable'] = trans_number(df['订单应付金额'])
+    obj['pay_way'] = trans_string(df['支付方式'])
+    obj['service_charge'] = trans_number(df['手续费'])
+    obj['user_name'] = trans_string(df['收件人'])
+    obj['user_phone'] = trans_string(df['收件人手机号'])
+    obj['province'] = trans_string(df['省'])
+    obj['city'] = trans_string(df['市'])
+    obj['area'] = trans_string(df['区'])
+    obj['street'] = trans_string(df['街道'])
+    obj['detailed_address'] = trans_string(df['详细地址'])
+    obj['msg_from_user'] = trans_string(df['买家留言'])
+    obj['order_submit_time'] = trans_time(df['订单提交时间'])
+    obj['shop_remarks'] = trans_string(df['商家备注'])
+    obj['order_finish_time'] = trans_time(df['订单完成时间'])
+    obj['order_pay_time'] = trans_time(df['支付完成时间'])
+    obj['app_chanel'] = trans_string(df['APP渠道'])
+    obj['user_from'] = trans_string(df['流量来源'])
+    obj['order_status'] = trans_string(df['订单状态'])
+    obj['promised_delivery_time'] = trans_time(df['承诺发货时间'])
+    obj['order_type'] = trans_string(df['订单类型'])
+    obj['partner_id'] = trans_string(df['达人ID'])
+    obj['partner_name'] = trans_string(df['达人昵称'])
+    obj['post_sale_status'] = trans_string(df['售后状态'])
+    obj['cancel_reason'] = trans_string(df['取消原因'])
+    obj['scheduled_delivery_time'] = trans_time(df['预约发货时间'])
+    obj['safe_buy'] = trans_string(df['是否安心购'])
+    obj['ad_chanel'] = trans_string(df['广告渠道'])
+    obj['platform_pay_discount_amount'] = trans_number(df['平台实际承担优惠金额'])
+    obj['shop_pay_discount_amount'] = trans_number(df['商家实际承担优惠金额'])
+    obj['partner_pay_discount_amount'] = trans_number(df['达人实际承担优惠金额'])
+    obj['estimated_delivery_time'] = trans_time(df['预计送达时间'])
+    obj['order_submit_month'] = trans_number(df['订单提交月份'])
+    obj['order_submit_date'] = trans_time(df['订单提交日期'])
+    obj['estimated_collection_amount'] = trans_number(df['预估收款金额'])
+    obj['express_delivery_date'] = trans_time(df['发货日期'])
+    obj['express_delivery_days'] = trans_number(df['几天发货'])
+    obj['post_sale_id'] = trans_number(df['售后单号'])
+    obj['post_sale_type'] = trans_string(df['售后类型'])
+    obj['post_sale_apply_time'] = trans_time(df['售后申请时间'])
+    obj['post_sale_reason'] = trans_string(df['售后原因'])
+    obj['post_sale_reason_tag'] = trans_string(df['售后原因标签'])
+    obj['return_express_number'] = trans_string(df['退货物流单号'])
+    obj['return_delivery_time'] = trans_time(df['退货发货时间'])
+    obj['post_sale_apply_agree_time'] = trans_time(df['同意售后申请时间'])
+    obj['shop_refund_time'] = trans_time(df['商家退款时间'])
+    obj['user_arrival_time'] = trans_time(df['用户到账时间'])
+    obj['post_sale_close_time'] = trans_time(df['售后关闭时间'])
+    obj['arbitration_status'] = trans_string(df['仲裁状态'])
+    obj['responsible'] = trans_string(df['纠纷责任方'])
+    obj['post_sale_finish_time'] = trans_time(df['售后完结时间'])
+    obj['order_remarks'] = trans_string(df['订单备注'])
+    obj['user_post_sale_desc'] = trans_string(df['用户售后说明'])
+    obj['after_sale_remarks'] = trans_string(df['售后备注'])
+    obj['post_sale_apply_date'] = trans_time(df['售后申请时间'])
+    obj['refund_days'] = trans_number(df['几天退款'])
+    obj['settle_time'] = trans_time(df['结算时间'])
+    obj['settle_amount'] = trans_number(df['结算金额'])
+    obj['total_income'] = trans_number(df['收入合计'])
+    obj['platform_service_amount'] = trans_number(df['平台服务费'])
+    obj['platform_subsidy'] = trans_number(df['平台补贴'])
+    obj['partner_subsidy'] = trans_number(df['达人补贴'])
+    obj['dy_pay_subsidy'] = trans_number(df['抖音支付补贴'])
+    obj['dy_month_subsidy'] = trans_number(df['抖音月付营销补贴'])
+    obj['user_total_pay'] = trans_number(df['用户实付'])
+    obj['commission'] = trans_number(df['佣金'])
+    obj['channel_commission'] = trans_number(df['渠道分成'])
+    obj['investment_commission'] = trans_number(df['招商服务费'])
+    obj['live_3part_commission'] = trans_number(df['直播间站外推广'])
+    obj['other_commission'] = trans_number(df['其他分成'])
+    obj['other_commission_desc'] = trans_string(df['其他分成说明'])
+    obj['total_expend'] = trans_number(df['支出合计'])
+    obj['remark'] = trans_string(df['备注'])
+    return obj
 
 
 def orders_mul(orders_from_file, orders_return_from_file, orders_settle_from_file):
-    mul_months = get_last_months(3)
+    ret = False
 
     # 所有订单最近三个月的销售情况 所有订单数 未支付 退款 退货退款订单 实收订单  邮费次数  赠品次数
     # 订单提交月份
@@ -299,8 +355,11 @@ def orders_mul(orders_from_file, orders_return_from_file, orders_settle_from_fil
     orders_all = safe_change_name(orders_all, '订单类型_x', '订单类型')
     orders_all = safe_change_name(orders_all, '售后状态_x', '售后状态')
 
+    orders_all['商品ID'] = pd.to_numeric(
+        orders_all['商品ID'])
+
     orders_all = safe_keep_ol(orders_all,
-                              ['主订单编号', '子订单编号', '商品名称', '商品规格', '商品单价', '订单应付金额',
+                              ['主订单编号', '子订单编号', '商品ID', '商品数量', '选购商品', '商品规格', '商品单价', '订单应付金额',
                                '支付方式', '手续费', '收件人', '收件人手机号', '省', '市', '区', '街道',
                                '详细地址', '买家留言', '订单提交时间', '商家备注', '订单完成时间', '支付完成时间',
                                'APP渠道', '流量来源', '订单状态', '承诺发货时间', '订单类型', '达人ID', '达人昵称',
@@ -312,31 +371,42 @@ def orders_mul(orders_from_file, orders_return_from_file, orders_settle_from_fil
                                '售后申请日期', '几天退款', '结算时间', '结算金额', '收入合计', '平台服务费', '平台补贴',
                                '达人补贴', '抖音支付补贴', '抖音月付营销补贴', '用户实付', '佣金', '渠道分成', '招商服务费',
                                '直播间站外推广', '其他分成', '其他分成说明', '支出合计', '备注'])
-    # write_excel_file('aa.xlsx', 'a', orders_all)
     orders_dict = orders_all.to_dict('records')
     # 更新数据库数据
     ret = data_base_update(orders_dict)
-
-    if ret:
-        return 200
-    return 201
+    return ret
 
 
 def data_base_update(datas):
-    print('data_base_update')
-    print(datas[0])
-    coount = 0
+    ret = False
+    count = 0
     for data in datas:
-        order_model = transol2dict(data)
-        print('11111111111111111111111111111')
-        count = 0
-        print(order_model)
-        Orders.objects.update_or_create(
-            order_id=order_model['order_id'], defaults=order_model)
-        count = count + 1
-        if count > 10:
-            break
-    return True
+        try:
+            order_model = transOl2dict(data)
+            # print(order_model)
+        except Exception as e:
+            print(e)
+        try:
+            olds = Orders.objects.filter(order_id=order_model['order_id'])
+            if len(olds) > 0:
+                # 判断是否需要更新
+                old = olds[0]
+                update, update_data = old._is_module_need_update(
+                    old, order_model)
+                if update:
+                    olds.update(**update_data)
+            else:
+                # 创建
+                Orders.objects.update_or_create(
+                    order_id=order_model['order_id'], defaults=order_model)
+            count = count + 1
+            # if count > 10:
+            #    break
+            ret = True
+        except Exception as e:
+            print(e)
+
+    return ret
 
 
 def orders_pares(orders, custom, settle):
@@ -353,3 +423,6 @@ def orders_pares(orders, custom, settle):
 #    'https://app.informat.cn/file/441d8b327b5e4c85a0b58a1d7ec9ec3e_p.csv',
 #    'https://app.informat.cn/file/f824c0464cbb4920aa6ed29735d86684_p.csv',
 #    'https://app.informat.cn/file/ade5d69dcf0442c0875b802980b170f5_p.csv')
+
+
+# SELECT  p_id a, order_submit_date b, COUNT(*) c, express_delivery_days d FROM "OrdersModel_orders" GROUP BY p_id, order_submit_date, express_delivery_days

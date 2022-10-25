@@ -1,4 +1,5 @@
 from django.db import models
+import pandas as pd
 
 # Create your models here.
 # 订单表
@@ -16,14 +17,30 @@ from django.db import models
 
 
 class Orders(models.Model):
+    id = models.AutoField(primary_key=True)
     # '子订单编号'
-    order_id = models.BigIntegerField(primary_key=True, unique=True, default=0)
+    order_id = models.CharField(unique=True, max_length=128, default=None)
+    # models.BigIntegerField(db_index=True, unique=True, default=None)
     # '主订单编号'
-    parent_id = models.BigIntegerField(db_index=True, default=None)
+    parent_id = models.CharField(
+        db_index=True, max_length=128, default=None)
+    #models.BigIntegerField(db_index=True, default=None)
+
+    # '商品ID'
+    p_id = models.CharField(db_index=True, max_length=128, default=None)
+    #models.BigIntegerField(null=True, db_index=True, default=None)
+
+    # '商品数量'
+    p_count = models.IntegerField(null=True, default=None)
+
     # '商品名称'
     name = models.CharField(null=True, max_length=512, default=None)
     # '商品规格'
     p_specs = models.CharField(null=True, max_length=128, default=None)
+
+    # 'SKU拼接码'
+    sku_code = models.CharField(null=True, max_length=128, default=None)
+
     # '商品单价'
     p_price = models.DecimalField(
         null=True, max_digits=5, decimal_places=2, default=None)
@@ -201,86 +218,96 @@ class Orders(models.Model):
     # '备注'
     remark = models.CharField(null=True, max_length=1024, default=None)
 
-    def _is_module_need_update(self, mode):
+    def _is_module_need_update(self, old, new):
         ret = False
-        self.post_sale_apply_agree_time
-        return ret
-
-    def _df_2_module(self, df):
-        self.order_id = df['子订单编号']
-        self.parent_id = df['主订单编号']
-        self.name = df['商品名称']
-        self.p_specs = df['商品规格']
-        self.p_price = df['商品单价']
-        self.payable = df['订单应付金额']
-        self.pay_way = df['支付方式']
-        self.service_charge = df['手续费']
-        self.user_name = df['收件人']
-        self.user_phone = df['收件人手机号']
-        self.province = df['省']
-        self.city = df['市']
-        self.area = df['区']
-        self.street = df['街道']
-        self.detailed_address = df['详细地址']
-        self.msg_from_user = df['买家留言']
-        self.order_submit_time = df['订单提交时间']
-        self.shop_remarks = df['商家备注']
-        self.order_finish_time = df['订单完成时间']
-        self.order_pay_time = df['支付完成时间']
-        self.app_chanel = df['APP渠道']
-        self.user_from = df['流量来源']
-        self.order_status = df['订单状态']
-        self.promised_delivery_time = df['承诺发货时间']
-        self.order_type = df['订单类型']
-        self.partner_id = df['达人ID']
-        self.partner_name = df['达人昵称']
-        self.post_sale_status = df['售后状态']
-        self.cancel_reason = df['取消原因']
-        self.scheduled_delivery_time = df['预约发货时间']
-        self.safe_buy = df['是否安心购']
-        self.ad_chanel = df['广告渠道']
-        self.platform_pay_discount_amount = df['平台实际承担优惠金额']
-        self.shop_pay_discount_amount = df['商家实际承担优惠金额']
-        self.partner_pay_discount_amount = df['达人实际承担优惠金额']
-        self.estimated_delivery_time = df['预计送达时间']
-        self.order_submit_month = df['订单提交月份']
-        self.order_submit_date = df['订单提交日期']
-        self.estimated_collection_amount = df['预估收款金额']
-        self.express_delivery_date = df['发货日期']
-        self.express_delivery_days = df['几天发货']
-        self.post_sale_id = df['售后单号']
-        self.post_sale_type = df['售后类型']
-        self.post_sale_apply_time = df['售后申请时间']
-        self.post_sale_reason = df['售后原因']
-        self.post_sale_reason_tag = df['售后原因标签']
-        self.return_express_number = df['退货物流单号']
-        self.return_delivery_time = df['退货发货时间']
-        self.post_sale_apply_agree_time = df['同意售后申请时间']
-        self.shop_refund_time = df['商家退款时间']
-        self.user_arrival_time = df['用户到账时间']
-        self.post_sale_close_time = df['售后关闭时间']
-        self.arbitration_status = df['仲裁状态']
-        self.responsible = df['纠纷责任方']
-        self.post_sale_finish_time = df['售后完结时间']
-        self.order_remarks = df['订单备注']
-        self.user_post_sale_desc = df['用户售后说明']
-        self.after_sale_remarks = df['售后备注']
-        self.post_sale_apply_date = df['售后申请日期']
-        self.refund_days = df['几天退款']
-        self.settle_time = df['结算时间']
-        self.settle_amount = df['结算金额']
-        self.total_income = df['收入合计']
-        self.platform_service_amount = df['平台服务费']
-        self.platform_subsidy = df['平台补贴']
-        self.partner_subsidy = df['达人补贴']
-        self.dy_pay_subsidy = df['抖音支付补贴']
-        self.dy_month_subsidy = df['抖音月付营销补贴']
-        self.user_total_pay = df['用户实付']
-        self.commission = df['佣金']
-        self.channel_commission = df['渠道分成']
-        self.investment_commission = df['招商服务费']
-        self.live_3part_commission = df['直播间站外推广']
-        self.other_commission = df['其他分成']
-        self.other_commission_desc = df['其他分成说明']
-        self.total_expend = df['支出合计']
-        self.remark = df['备注']
+        updates = {}
+        default_compare = ['name',
+                           'p_id',
+                           'p_count',
+                           'p_specs',
+                           'p_price',
+                           'payable',
+                           'pay_way',
+                           'service_charge',
+                           'user_name',
+                           'user_phone',
+                           'province',
+                           'city',
+                           'area',
+                           'street',
+                           'detailed_address',
+                           'msg_from_user',
+                           'order_submit_time',
+                           'shop_remarks',
+                           'order_finish_time',
+                           'order_pay_time',
+                           'app_chanel',
+                           'user_from',
+                           'order_status',
+                           'promised_delivery_time',
+                           'order_type',
+                           'partner_id',
+                           'partner_name',
+                           'post_sale_status',
+                           'cancel_reason',
+                           'scheduled_delivery_time',
+                           'safe_buy',
+                           'ad_chanel',
+                           'platform_pay_discount_amount',
+                           'shop_pay_discount_amount',
+                           'partner_pay_discount_amount',
+                           'estimated_delivery_time',
+                           'order_submit_month',
+                           'order_submit_date',
+                           'estimated_collection_amount',
+                           'express_delivery_date',
+                           'express_delivery_days',
+                           'post_sale_id',
+                           'post_sale_type',
+                           'post_sale_apply_time',
+                           'post_sale_reason',
+                           'post_sale_reason_tag',
+                           'return_express_number',
+                           'return_delivery_time',
+                           'post_sale_apply_agree_time',
+                           'shop_refund_time',
+                           'user_arrival_time',
+                           'post_sale_close_time',
+                           'arbitration_status',
+                           'responsible',
+                           'post_sale_finish_time',
+                           'order_remarks',
+                           'user_post_sale_desc',
+                           'after_sale_remarks',
+                           'post_sale_apply_date',
+                           'refund_days',
+                           'settle_time',
+                           'settle_amount',
+                           'total_income',
+                           'platform_service_amount',
+                           'platform_subsidy',
+                           'partner_subsidy',
+                           'dy_pay_subsidy',
+                           'dy_month_subsidy',
+                           'user_total_pay',
+                           'commission',
+                           'channel_commission',
+                           'investment_commission',
+                           'live_3part_commission',
+                           'other_commission',
+                           'other_commission_desc',
+                           'total_expend',
+                           'remark']
+        for com in default_compare:
+            old_item = getattr(old, com)
+            new_item = new[com]
+            if pd.isna(old_item) and pd.notna(new_item):
+                updates[com] = new_item
+                ret = True
+                continue
+            elif pd.isna(new_item) and pd.notna(old_item):
+                continue
+            elif new_item != old_item:
+                ret = True
+                updates[com] = new_item
+        return ret, updates
