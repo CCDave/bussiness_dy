@@ -217,6 +217,19 @@ class Orders(models.Model):
                                        max_digits=5, decimal_places=2, default=None)
     # '备注'
     remark = models.CharField(null=True, max_length=1024, default=None)
+    # '关联记录'
+    order_link = models.CharField(null=True, max_length=128, default='null')
+
+    # 未付款
+    r_no_pay = models.IntegerField(null=True, default=None)
+
+    # 退款 发货前退款 发货后退款 已发货 备货中 已结算
+    r_refund = models.IntegerField(null=True, default=None)
+    # 发货前退款 发货后退款
+    r_refund_before = models.IntegerField(null=True, default=None)
+    r_refund_after = models.IntegerField(null=True, default=None)
+    # 已发货 备货中 已结算
+    r_delivery = models.IntegerField(null=True, default=None)
 
     def _is_module_need_update(self, old, new):
         ret = False
@@ -225,6 +238,7 @@ class Orders(models.Model):
                            'p_id',
                            'p_count',
                            'p_specs',
+                           'sku_code',
                            'p_price',
                            'payable',
                            'pay_way',

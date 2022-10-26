@@ -111,6 +111,8 @@ def trans_number(params):
     try:
         if isinstance(params, int):
             ret = params
+        elif isinstance(params, pd.Timedelta):
+            ret = params.days  # astype('timedelta64[D]').astype(int)
         else:
             ret = pd.to_numeric(params)
             ret = Decimal(ret).quantize(Decimal('0.00'))
@@ -280,8 +282,6 @@ def orders_mul(orders_from_file, orders_return_from_file, orders_settle_from_fil
     orders_from_file["几天发货"] = orders_from_file["发货日期"] - \
         orders_from_file["订单提交日期"]
 
-    # print(len(orders_return_from_file))
-
     # 售后订单处理
     # orders_return_from_file['订单号'] = orders_return_from_file['订单号'].astype('str')
     # orders_return_from_file['售后单号'] = orders_return_from_file['售后单号'].astype('str')
@@ -308,7 +308,6 @@ def orders_mul(orders_from_file, orders_return_from_file, orders_settle_from_fil
 
     orders_all["几天退款"] = orders_all["售后申请日期"] - \
         orders_all["订单提交日期"]
-
     # 处理结算表
     orders_settle_from_file = orders_settle_from_file.drop(index=0)
 
