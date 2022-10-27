@@ -10,33 +10,6 @@ from OrdersModel.models import Orders
 import json
 import numpy as np
 
-# 将class转dict,以_开头的属性不要
-
-
-def props(obj):
-    pr = {}
-    for name in dir(obj):
-        value = getattr(obj, name)
-        if not name.startswith('__') and not callable(value) and not name.startswith('_'):
-            pr[name] = value
-    return pr
-# 将class转dict,以_开头的也要
-
-
-def props_with_(obj):
-    pr = {}
-    for name in dir(obj):
-        value = getattr(obj, name)
-        if not name.startswith('__') and not callable(value):
-            pr[name] = value
-    return pr
-# dict转obj，先初始化一个obj
-
-
-def dict2obj(obj, dict):
-    obj.__dict__.update(dict)
-    return obj
-
 
 def currency_to_float(e):
     if isinstance(e, str):
@@ -48,16 +21,6 @@ def string_replace(e, s):
     if isinstance(e, str):
         return e.replace(s, '')
     return e
-
-
-def get_last_months(count):
-    ret = []
-    now_date_time = datetime.datetime.now()
-    for i in range(0, count):
-        ret.append(now_date_time.date)
-        now_date_time = (now_date_time - datetime.timedelta(days=30))
-        i = i + 1
-    return ret
 
 
 def write_excel_file(file_path, sheet, data):
@@ -73,10 +36,6 @@ def trans_head2_string(data, key):
     for k in key:
         data[k] = data[k].astype('str')
     return data
-
-
-def get_pandas_from_url(url):
-    return pd.read_csv(url)
 
 
 def safe_change_name(data, old, new):
@@ -109,13 +68,20 @@ def safe_keep_ol(data, keeps):
 def trans_number(params):
     ret = None
     try:
-        if isinstance(params, int):
+        if pd.isna(params):
+            ret = None
+        elif isinstance(params, int):
             ret = params
         elif isinstance(params, pd.Timedelta):
             ret = params.days  # astype('timedelta64[D]').astype(int)
         else:
+            if isinstance(params, str):
+                params = params.replace(",", "")
             ret = pd.to_numeric(params)
-            ret = Decimal(ret).quantize(Decimal('0.00'))
+            if isinstance(ret, np.int64):
+                ret = ret.astype(Decimal)
+            else:
+                ret = Decimal(ret).quantize(Decimal('0.00'))
             # if isinstance(ret, np.float64):
             #    ret = Decimal(ret)
             # print(type(ret))
@@ -148,11 +114,16 @@ def trans_string(params):
 def trans_time(params):
     ret = None
     try:
+        if pd.isna(params):
+            ret = None
         if isinstance(params, datetime.datetime):
             ret = params
         elif isinstance(params, str):
-            params = params.replace('\t', '')
-            ret = pd.to_datetime(params)
+            if params == '-':
+                ret = None
+            else:
+                params = params.replace('\t', '')
+                ret = pd.to_datetime(params)
         else:
             ret = pd.to_datetime(params)
     except Exception as e:
@@ -162,6 +133,70 @@ def trans_time(params):
     if pd.isna(params):
         ret = None
     return ret
+
+
+def make_order_status_values(item):
+    # 给订单类型设置状态
+    order_status = item['order_status']
+    post_sale_status = item['post_sale_status']
+    express_delivery_date = item['express_delivery_date']
+    settle_date = item['settle_date']
+    settle_amount = item['settle_amount']
+    if order_status == '已关闭':
+        if post_sale_status == '-':
+            item['r_order_status'] = '未付款'
+        elif post_sale_status == '同意退款，退款成功':
+            if pd.isna(express_delivery_date):
+                item['r_order_status'] = '发货前退款'
+            else:
+                item['r_order_status'] = '发货后退款'
+        else:
+            item['r_order_status'] = '未知'
+    elif order_status == '已发货':
+        if post_sale_status == '-':
+            item['r_order_status'] = '已发货'
+        elif post_sale_status == '补寄/换货，待买家收货':
+            item['r_order_status'] = '已发货'
+        elif post_sale_status == '待买家退货处理':
+            item['r_order_status'] = '发货后退款'
+        elif post_sale_status == '待商家收货':
+            item['r_order_status'] = '发货后退款'
+        elif post_sale_status == '售后关闭':
+            item['r_order_status'] = '已发货'
+        else:
+            item['r_order_status'] = '未知'
+    elif order_status == '已完成':
+        if post_sale_status == '-':
+            item['r_order_status'] = '已发货'
+        elif post_sale_status == '补寄/换货成功':
+            item['r_order_status'] = '已发货'
+        elif post_sale_status == '待买家退货处理':
+            item['r_order_status'] = '发货后退款'
+        elif post_sale_status == '待商家收货':
+            item['r_order_status'] = '发货后退款'
+        elif post_sale_status == '售后关闭':
+            item['r_order_status'] = '已发货'
+        elif post_sale_status == '同意退款，退款成功':
+            item['r_order_status'] = '发货后退款'
+        else:
+            item['r_order_status'] = '未知'
+    elif order_status == '备货中':
+        item['r_order_status'] = '备货中'
+
+    if pd.notna(settle_date) and pd.notna(settle_amount):
+        if settle_amount > 0:
+            item['r_order_settle_status'] = '已结算'
+        else:
+            item['r_order_settle_status'] = '反结算'
+    elif item['r_order_status'] == '备货中' or item['r_order_status'] == '已发货':
+        item['r_order_settle_status'] = '待结算'
+    elif item['r_order_status'] == '未付款' or\
+            item['r_order_status'] == '发货前退款' or\
+            item['r_order_status'] == '发货后退款':
+        item['r_order_settle_status'] = '退单'
+    else:
+        item['r_order_settle_status'] = None
+    return item
 
 
 def transOl2dict(df):
@@ -217,6 +252,8 @@ def transOl2dict(df):
     obj['order_submit_month'] = trans_number(df['订单提交月份'])
     obj['order_submit_date'] = trans_time(df['订单提交日期'])
     obj['estimated_collection_amount'] = trans_number(df['预估收款金额'])
+
+    obj['express_delivery_time'] = trans_time(df['发货时间'])
     obj['express_delivery_date'] = trans_time(df['发货日期'])
     obj['express_delivery_days'] = trans_number(df['几天发货'])
     obj['post_sale_id'] = trans_number(df['售后单号'])
@@ -238,8 +275,12 @@ def transOl2dict(df):
     obj['after_sale_remarks'] = trans_string(df['售后备注'])
     obj['post_sale_apply_date'] = trans_time(df['售后申请时间'])
     obj['refund_days'] = trans_number(df['几天退款'])
+
     obj['settle_time'] = trans_time(df['结算时间'])
     obj['settle_amount'] = trans_number(df['结算金额'])
+    obj['settle_date'] = trans_time(df['结算日期'])
+    obj['settle_days'] = trans_number(df['几天结算'])
+
     obj['total_income'] = trans_number(df['收入合计'])
     obj['platform_service_amount'] = trans_number(df['平台服务费'])
     obj['platform_subsidy'] = trans_number(df['平台补贴'])
@@ -255,6 +296,7 @@ def transOl2dict(df):
     obj['other_commission_desc'] = trans_string(df['其他分成说明'])
     obj['total_expend'] = trans_number(df['支出合计'])
     obj['remark'] = trans_string(df['备注'])
+    obj = make_order_status_values(obj)
     return obj
 
 
@@ -270,9 +312,11 @@ def orders_mul(orders_from_file, orders_return_from_file, orders_settle_from_fil
     orders_from_file['订单提交日期'] = pd.to_datetime(
         orders_from_file['订单提交时间']).dt.date
 
-    # 预估收款金额
-    orders_from_file['预估收款金额'] = pd.to_numeric(orders_from_file['订单应付金额'].map(
+    # 订单应付金额
+    orders_from_file['订单应付金额'] = pd.to_numeric(orders_from_file['订单应付金额'].map(
         lambda x: currency_to_float(x)), downcast='float')
+    # 预估收款金额
+    orders_from_file['预估收款金额'] = orders_from_file['订单应付金额']
 
     # 发货日期
     orders_from_file['发货日期'] = pd.to_datetime(
@@ -354,6 +398,12 @@ def orders_mul(orders_from_file, orders_return_from_file, orders_settle_from_fil
     orders_all = safe_change_name(orders_all, '订单类型_x', '订单类型')
     orders_all = safe_change_name(orders_all, '售后状态_x', '售后状态')
 
+    orders_all["结算日期"] = pd.to_datetime(
+        orders_all['结算时间']).dt.date
+
+    orders_all["几天结算"] = orders_all["结算日期"] - \
+        orders_all["订单提交日期"]
+
     orders_all['商品ID'] = pd.to_numeric(
         orders_all['商品ID'])
 
@@ -361,13 +411,13 @@ def orders_mul(orders_from_file, orders_return_from_file, orders_settle_from_fil
                               ['主订单编号', '子订单编号', '商品ID', '商品数量', '选购商品', '商品规格', '商品单价', '订单应付金额',
                                '支付方式', '手续费', '收件人', '收件人手机号', '省', '市', '区', '街道',
                                '详细地址', '买家留言', '订单提交时间', '商家备注', '订单完成时间', '支付完成时间',
-                               'APP渠道', '流量来源', '订单状态', '承诺发货时间', '订单类型', '达人ID', '达人昵称',
+                               'APP渠道', '流量来源', '订单状态', '发货时间', '承诺发货时间', '订单类型', '达人ID', '达人昵称',
                                '售后状态', '取消原因', '预约发货时间', '是否安心购', '广告渠道', '平台实际承担优惠金额',
                                '商家实际承担优惠金额', '达人实际承担优惠金额', '预计送达时间', '订单提交月份', '订单提交日期',
                                '预估收款金额', '发货日期', '几天发货', '售后单号', '售后类型', '售后申请时间', '售后原因',
                                '售后原因标签', '退货物流单号', '退货发货时间', '同意售后申请时间', '商家退款时间', '用户到账时间',
                                '售后关闭时间', '仲裁状态', '纠纷责任方', '售后完结时间', '订单备注', '用户售后说明', '售后备注',
-                               '售后申请日期', '几天退款', '结算时间', '结算金额', '收入合计', '平台服务费', '平台补贴',
+                               '售后申请日期', '几天退款', '结算时间', '结算日期', '几天结算', '结算金额', '收入合计', '平台服务费', '平台补贴',
                                '达人补贴', '抖音支付补贴', '抖音月付营销补贴', '用户实付', '佣金', '渠道分成', '招商服务费',
                                '直播间站外推广', '其他分成', '其他分成说明', '支出合计', '备注'])
     orders_dict = orders_all.to_dict('records')
@@ -409,9 +459,9 @@ def data_base_update(datas):
 
 
 def orders_pares(orders, custom, settle):
-    orders = pd.read_csv(orders)
-    custom_orders = pd.read_csv(custom)
-    settle_orders = pd.read_csv(settle)
+    orders = pd.read_csv(orders, low_memory=False)
+    custom_orders = pd.read_csv(custom, low_memory=False)
+    settle_orders = pd.read_csv(settle, low_memory=False)
     ret = 201
     if (orders_mul(orders, custom_orders, settle_orders)):
         ret = 200

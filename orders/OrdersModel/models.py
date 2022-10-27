@@ -41,17 +41,21 @@ class Orders(models.Model):
     # 'SKU拼接码'
     sku_code = models.CharField(null=True, max_length=128, default=None)
 
+    # 'SKU编码'
+    s_sku_finish_code = models.CharField(
+        null=True, max_length=128, default=None)
+
     # '商品单价'
     p_price = models.DecimalField(
-        null=True, max_digits=5, decimal_places=2, default=None)
+        null=True, max_digits=15, decimal_places=2, default=None)
     # '订单应付金额'
     payable = models.DecimalField(
-        null=True, max_digits=5, decimal_places=2, default=None)
+        null=True, max_digits=15, decimal_places=2, default=None)
     # '支付方式'
     pay_way = models.CharField(null=True, max_length=128, default=None)
     # '手续费'
     service_charge = models.DecimalField(null=True,
-                                         max_digits=5, decimal_places=2, default=None)
+                                         max_digits=15, decimal_places=2, default=None)
     # '收件人'
     user_name = models.CharField(null=True, max_length=512, default=None)
     # '收件人手机号'
@@ -104,13 +108,13 @@ class Orders(models.Model):
     ad_chanel = models.CharField(null=True, max_length=128, default=None)
     # '平台实际承担优惠金额'
     platform_pay_discount_amount = models.DecimalField(null=True,
-                                                       max_digits=5, decimal_places=2, default=None)
+                                                       max_digits=15, decimal_places=2, default=None)
     # '商家实际承担优惠金额'
     shop_pay_discount_amount = models.DecimalField(null=True,
-                                                   max_digits=5, decimal_places=2, default=None)
+                                                   max_digits=15, decimal_places=2, default=None)
     # '达人实际承担优惠金额'
     partner_pay_discount_amount = models.DecimalField(null=True,
-                                                      max_digits=5, decimal_places=2, default=None)
+                                                      max_digits=15, decimal_places=2, default=None)
     # '预计送达时间'
     estimated_delivery_time = models.DateTimeField(null=True, default=None)
     # '订单提交月份'
@@ -119,7 +123,10 @@ class Orders(models.Model):
     order_submit_date = models.DateTimeField(null=True, default=None)
     # '预估收款金额'
     estimated_collection_amount = models.DecimalField(null=True,
-                                                      max_digits=5, decimal_places=2, default=None)
+                                                      max_digits=15, decimal_places=2, default=None)
+    # '发货时间'
+    express_delivery_time = models.DateTimeField(null=True, default=None)
+
     # '发货日期'
     express_delivery_date = models.DateTimeField(null=True, default=None)
     # '几天发货'
@@ -168,68 +175,74 @@ class Orders(models.Model):
     post_sale_apply_date = models.DateTimeField(null=True, default=None)
     # '几天退款'
     refund_days = models.IntegerField(null=True, default=None)
+
     # '结算时间'
     settle_time = models.DateTimeField(null=True, default=None)
     # '结算金额'
     settle_amount = models.DecimalField(null=True,
-                                        max_digits=5, decimal_places=2, default=None)
+                                        max_digits=15, decimal_places=2, default=None)
+
+    # '结算日期'
+    settle_date = models.DateTimeField(null=True, default=None)
+    # '几天结算'
+    settle_days = models.IntegerField(null=True, default=None)
+
     # '收入合计'
     total_income = models.DecimalField(null=True,
-                                       max_digits=5, decimal_places=2, default=None)
+                                       max_digits=15, decimal_places=2, default=None)
     # '平台服务费'
     platform_service_amount = models.DecimalField(null=True,
-                                                  max_digits=5, decimal_places=2, default=None)
+                                                  max_digits=15, decimal_places=2, default=None)
     # '平台补贴'
     platform_subsidy = models.DecimalField(null=True,
-                                           max_digits=5, decimal_places=2, default=None)
+                                           max_digits=15, decimal_places=2, default=None)
     # '达人补贴'
     partner_subsidy = models.DecimalField(null=True,
-                                          max_digits=5, decimal_places=2, default=None)
+                                          max_digits=15, decimal_places=2, default=None)
     # '抖音支付补贴'
     dy_pay_subsidy = models.DecimalField(null=True,
-                                         max_digits=5, decimal_places=2, default=None)
+                                         max_digits=15, decimal_places=2, default=None)
     # '抖音月付营销补贴'
     dy_month_subsidy = models.DecimalField(null=True,
-                                           max_digits=5, decimal_places=2, default=None)
+                                           max_digits=15, decimal_places=2, default=None)
     # '用户实付'
     user_total_pay = models.DecimalField(null=True,
-                                         max_digits=5, decimal_places=2, default=None)
+                                         max_digits=15, decimal_places=2, default=None)
     # '佣金'
     commission = models.DecimalField(
-        null=True, max_digits=5, decimal_places=2, default=None)
+        null=True, max_digits=15, decimal_places=2, default=None)
     # '渠道分成'
     channel_commission = models.DecimalField(null=True,
-                                             max_digits=5, decimal_places=2, default=None)
+                                             max_digits=15, decimal_places=2, default=None)
     # '招商服务费'
     investment_commission = models.DecimalField(null=True,
-                                                max_digits=5, decimal_places=2, default=None)
+                                                max_digits=15, decimal_places=2, default=None)
     # '直播间站外推广'
     live_3part_commission = models.DecimalField(null=True,
-                                                max_digits=5, decimal_places=2, default=None)
+                                                max_digits=15, decimal_places=2, default=None)
     # '其他分成'
     other_commission = models.DecimalField(null=True,
-                                           max_digits=5, decimal_places=2, default=None)
+                                           max_digits=15, decimal_places=2, default=None)
     # '其他分成说明'
     other_commission_desc = models.CharField(
         null=True, max_length=1024, default=None)
     # '支出合计'
     total_expend = models.DecimalField(null=True,
-                                       max_digits=5, decimal_places=2, default=None)
+                                       max_digits=15, decimal_places=2, default=None)
     # '备注'
     remark = models.CharField(null=True, max_length=1024, default=None)
     # '关联记录'
     order_link = models.CharField(null=True, max_length=128, default='null')
 
-    # 未付款
-    r_no_pay = models.IntegerField(null=True, default=None)
+    # 未付款 退款 发货前退款 发货后退款 已发货 备货中
+    r_order_status = models.CharField(
+        null=True, max_length=128, default='null')
+    # 已结算 反结算 待结算 退货
+    r_order_settle_status = models.CharField(
+        null=True, max_length=128, default='null')
 
-    # 退款 发货前退款 发货后退款 已发货 备货中 已结算
-    r_refund = models.IntegerField(null=True, default=None)
-    # 发货前退款 发货后退款
-    r_refund_before = models.IntegerField(null=True, default=None)
-    r_refund_after = models.IntegerField(null=True, default=None)
-    # 已发货 备货中 已结算
-    r_delivery = models.IntegerField(null=True, default=None)
+    # '供应商'
+    s_supplier = models.CharField(null=True, max_length=128, default=None)
 
     def _is_module_need_update(self, old, new):
         ret = False
@@ -297,6 +310,8 @@ class Orders(models.Model):
                            'refund_days',
                            'settle_time',
                            'settle_amount',
+                           'settle_date',
+                           'settle_days',
                            'total_income',
                            'platform_service_amount',
                            'platform_subsidy',
@@ -311,7 +326,10 @@ class Orders(models.Model):
                            'other_commission',
                            'other_commission_desc',
                            'total_expend',
-                           'remark']
+                           'remark',
+                           'r_order_status',
+                           'r_order_settle_status']
+
         for com in default_compare:
             old_item = getattr(old, com)
             new_item = new[com]
