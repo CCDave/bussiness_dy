@@ -62,12 +62,20 @@ const start_date = dashboard.getParameter("下单日期-开始");
 const end_date = dashboard.getParameter("下单日期-结束");
 const supply = dashboard.getParameter("供应商");
 
-const conditionList = [];
+const filter = {
+  opt: "and",
+  conditionList: [],
+};
+
 if (product_id != null) {
-  conditionList.push({ fieldId: ids.p_id, opt: "eq", value: product_id });
+  filter.conditionList.push({
+    fieldId: ids.p_id,
+    opt: "eq",
+    value: product_id,
+  });
 }
 if (full_sku_code != null) {
-  conditionList.push({
+  filter.conditionList.push({
     fieldId: ids.s_sku_finish_code,
     opt: "contains",
     value: full_sku_code,
@@ -75,33 +83,33 @@ if (full_sku_code != null) {
 }
 
 if (start_date != null && end_date != null) {
-  conditionList.push({
-    filter: {
-      opt: "or",
-      conditionList: [
-        { fieldId: ids.order_submit_date, opt: "ge", value: start_date },
-        { fieldId: ids.order_submit_date, opt: "le", value: end_date },
-      ],
-    },
+  filter.conditionList.push({
+    fieldId: ids.order_submit_date,
+    opt: "ge",
+    value: start_date,
+  });
+  filter.conditionList.push({
+    fieldId: ids.order_submit_date,
+    opt: "le",
+    value: end_date,
   });
 } else if (
   (start_date != null && end_date == null) ||
   (start_date == null && end_date != null)
 ) {
-  conditionList.push({
+  filter.conditionList.push({
     fieldId: ids.order_submit_date,
     opt: "eq",
     value: start_date == null ? end_date : start_date,
   });
 }
 if (supply != null) {
-  conditionList.push({
+  filter.conditionList.push({
     fieldId: ids.s_supplier,
     opt: "eq",
     value: supply,
   });
 }
-
 let query_set = {
   useFieldName: true,
   groupByFieldList: [ids.r_order_status],
@@ -116,8 +124,8 @@ let query_set = {
     { field: ids.payable, func: "sum", distinct: false },
   ],
 };
-if (conditionList.length > 0) {
-  query_set.conditionList = conditionList;
+if (filter.conditionList.length > 0) {
+  query_set.filter = filter;
 }
 var resp = informat.table.query(ids.table_id, query_set);
 // 总订单数
@@ -155,49 +163,43 @@ const collect_s = collect(datas);
 let s = collect_s;
 var total_orders = s.sum("子订单编号_数量");
 var no_pay_orders = getValueByPairs(s, "订单阶段", "未付款", "子订单编号_数量");
-
-let refund_list = [];
-
-var content = "|渠道|订单数";
-for (let i = 0; i < 20; i++) {
-  let count = getValueByPairs(s, "几天退款", i, "子订单编号_数量");
-  if (i == 0) {
-    count += no_pay_orders;
-  }
-  refund_list.push(count);
-  content += `|${i}天`;
-}
-content += "\n|";
-for (let i = 0; i < 22; i++) {
-  content += "---|";
-}
-content += "\n";
-for (let j = 0; j < 3; j++) {
-  if (j == 0) {
-    content += `|退货率|${total_orders}|`;
-  }
-  if (j == 1) {
-    content += `|总退货率|${total_orders}|`;
-  }
-  if (j == 2) {
-    content += `|退货数|${total_orders}|`;
-  }
-  let total_refund = 0;
-  for (let i = 0; i < 20; i++) {
-    let value = 0;
-    if (j == 0) {
-      value = ((refund_list[i] / total_orders) * 100).toFixed(2);
-    }
-    if (j == 1) {
-      total_refund = total_refund + refund_list[i];
-      value = ((total_refund / total_orders) * 100).toFixed(2);
-    }
-    if (j == 2) {
-      value = refund_list[i];
-    }
-    content += `${value}|`;
-  }
-  content += "\n";
-}
+var refund_before = getValueByPairs(
+  s,
+  "订单阶段",
+  "发货前退款",
+  "子订单编号_数量"
+);
+var refund_after = getValueByPairs(
+  s,
+  "订单阶段",
+  "发货后退款",
+  "子订单编号_数量"
+);
+var delivery = getValueByPairs(s, "订单阶段", "已发货", "子订单编号_数量");
+var delivery_amount = getValueByPairs(
+  s,
+  "订单阶段",
+  "已发货",
+  "订单应付金额_求和"
+);
+var prepare = getValueByPairs(s, "订单阶段", "备货中", "子订单编号_数量");
+var prepare_amount = getValueByPairs(
+  s,
+  "订单阶段",
+  "备货中",
+  "订单应付金额_求和"
+);
+var total_refund = refund_after + refund_before + no_pay_orders;
+var waite_settle = delivery + prepare;
+var waite_settle_mount = delivery_amount + prepare_amount;
+var pay_percent = (1 - no_pay_orders / total_orders).toFixed(2);
+var refund_percent = (total_refund / total_orders).toFixed(2);
+var waite_settle_percent = (waite_settle / total_orders).toFixed(2);
+var before_percent = (refund_before / total_orders).toFixed(2);
+var after_percent = (refund_after / total_orders).toFixed(2);
+var content =
+  "|渠道|订单数|未付款|付款率|发前退款|发前退款率|发后退款|发后退款率|未支付/退款|退款率|已发货|备货中|待结算|待结算比例|待结算金额\n" +
+  "|---|------|----- |-----|-------|---------|--------|---------|----------|------|-----|------|-----|--------|--------| \n";
+content += `|总数| ${total_orders}|${no_pay_orders}|${pay_percent}|${refund_before}|${before_percent}|${refund_after}|${after_percent}|${total_refund}|${refund_percent}|${delivery}|${prepare} |${waite_settle} |${waite_settle_percent}|${waite_settle_mount} |\n`;
 
 dashboard.setMarkdownOption(content);

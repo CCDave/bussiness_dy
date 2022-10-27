@@ -77,7 +77,7 @@ if (full_sku_code != null) {
 if (start_date != null && end_date != null) {
   conditionList.push({
     filter: {
-      opt: "or",
+      opt: "and",
       conditionList: [
         { fieldId: ids.order_submit_date, opt: "ge", value: start_date },
         { fieldId: ids.order_submit_date, opt: "le", value: end_date },

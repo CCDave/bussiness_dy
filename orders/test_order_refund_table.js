@@ -62,12 +62,20 @@ const start_date = dashboard.getParameter("下单日期-开始");
 const end_date = dashboard.getParameter("下单日期-结束");
 const supply = dashboard.getParameter("供应商");
 
-const conditionList = [];
+const filter = {
+  opt: "and",
+  conditionList: [],
+};
+
 if (product_id != null) {
-  conditionList.push({ fieldId: ids.p_id, opt: "eq", value: product_id });
+  filter.conditionList.push({
+    fieldId: ids.p_id,
+    opt: "eq",
+    value: product_id,
+  });
 }
 if (full_sku_code != null) {
-  conditionList.push({
+  filter.conditionList.push({
     fieldId: ids.s_sku_finish_code,
     opt: "contains",
     value: full_sku_code,
@@ -75,27 +83,28 @@ if (full_sku_code != null) {
 }
 
 if (start_date != null && end_date != null) {
-  conditionList.push({
-    filter: {
-      opt: "or",
-      conditionList: [
-        { fieldId: ids.order_submit_date, opt: "ge", value: start_date },
-        { fieldId: ids.order_submit_date, opt: "le", value: end_date },
-      ],
-    },
+  filter.conditionList.push({
+    fieldId: ids.order_submit_date,
+    opt: "ge",
+    value: start_date,
+  });
+  filter.conditionList.push({
+    fieldId: ids.order_submit_date,
+    opt: "le",
+    value: end_date,
   });
 } else if (
   (start_date != null && end_date == null) ||
   (start_date == null && end_date != null)
 ) {
-  conditionList.push({
+  filter.conditionList.push({
     fieldId: ids.order_submit_date,
     opt: "eq",
     value: start_date == null ? end_date : start_date,
   });
 }
 if (supply != null) {
-  conditionList.push({
+  filter.conditionList.push({
     fieldId: ids.s_supplier,
     opt: "eq",
     value: supply,
@@ -110,8 +119,8 @@ let query_set = {
     { field: ids.p_count, func: "count", distinct: false },
   ],
 };
-if (conditionList.length > 0) {
-  query_set.conditionList = conditionList;
+if (filter.conditionList.length > 0) {
+  query_set.filter = filter;
 }
 var resp = informat.table.query(ids.table_id, query_set);
 // 总订单数
