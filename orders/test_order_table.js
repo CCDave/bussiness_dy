@@ -58,8 +58,8 @@ const ids = {
 
 const product_id = dashboard.getParameter("商品ID");
 const full_sku_code = dashboard.getParameter("SKU");
-const start_date = dashboard.getParameter("下单日期-开始");
-const end_date = dashboard.getParameter("下单日期-结束");
+const start_date = dashboard.getParameter("开始日期");
+const end_date = dashboard.getParameter("结束日期");
 const supply = dashboard.getParameter("供应商");
 
 const filter = {
