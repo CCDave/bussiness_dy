@@ -429,8 +429,8 @@ def orders_mul(item_id, orders_from_file, orders_return_from_file, orders_settle
 
 def data_base_update(item_id, datas):
     ret = False
-    create = 0
-    update = 0
+    create_count = 0
+    update_count = 0
     count = 0
     for data in datas:
         try:
@@ -447,13 +447,13 @@ def data_base_update(item_id, datas):
                     old, order_model)
                 if update:
                     olds.update(**update_data)
-                    update = update + 1
+                    update_count = update_count + 1
                     print('update:'+order_model['order_id'])
             else:
                 # 创建
                 Orders.objects.update_or_create(
                     order_id=order_model['order_id'], defaults=order_model)
-                create = create + 1
+                create_count = create_count + 1
                 print('create:'+order_model['order_id'])
             count = count + 1
             # if count > 10:
@@ -463,10 +463,10 @@ def data_base_update(item_id, datas):
             print(e)
         if (count % 500 == 0):
             set_task_status(item_id, '执行中 新增:{create}, 更新:{update}'.format(
-                create=create, update=update))
+                create=create_count, update=update_count))
 
     set_task_status(item_id, '完成 新增:{create}, 更新:{update}'.format(
-        create=create, update=update))
+        create=create_count, update=update_count))
     return ret
 
 
