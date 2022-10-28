@@ -462,7 +462,8 @@ def data_base_update(datas):
 
 def orders_pares(orders, custom, settle):
     orders = pd.read_csv(orders, low_memory=False)
-    custom_orders = pd.read_excel(custom, low_memory=False)
+    #custom_orders = pd.read_excel(custom, low_memory=False)
+    custom_orders = pd.read_excel(custom)
     settle_orders = pd.read_csv(settle, low_memory=False)
     ret = 201
     if (orders_mul(orders, custom_orders, settle_orders)):
