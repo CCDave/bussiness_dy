@@ -2,6 +2,7 @@ from bisect import insort
 import datetime
 from decimal import Decimal
 from doctest import FAIL_FAST
+from lib2to3.pgen2 import token
 import requests
 import csv
 from openpyxl import load_workbook
@@ -9,6 +10,9 @@ import pandas as pd
 from OrdersModel.models import Orders
 import json
 import numpy as np
+
+import swagger_client
+from swagger_client import Configuration
 
 
 def currency_to_float(e):
@@ -300,7 +304,7 @@ def transOl2dict(df):
     return obj
 
 
-def orders_mul(orders_from_file, orders_return_from_file, orders_settle_from_file):
+def orders_mul(item_id, orders_from_file, orders_return_from_file, orders_settle_from_file):
     ret = False
 
     # 所有订单最近三个月的销售情况 所有订单数 未支付 退款 退货退款订单 实收订单  邮费次数  赠品次数
@@ -422,12 +426,14 @@ def orders_mul(orders_from_file, orders_return_from_file, orders_settle_from_fil
                                '直播间站外推广', '其他分成', '其他分成说明', '支出合计', '备注'])
     orders_dict = orders_all.to_dict('records')
     # 更新数据库数据
-    ret = data_base_update(orders_dict)
+    ret = data_base_update(item_id, orders_dict)
     return ret
 
 
-def data_base_update(datas):
+def data_base_update(item_id, datas):
     ret = False
+    create = 0
+    update = 0
     count = 0
     for data in datas:
         try:
@@ -444,11 +450,13 @@ def data_base_update(datas):
                     old, order_model)
                 if update:
                     olds.update(**update_data)
+                    update = update + 1
                     print('update:'+order_model['order_id'])
             else:
                 # 创建
                 Orders.objects.update_or_create(
                     order_id=order_model['order_id'], defaults=order_model)
+                create = create + 1
                 print('create:'+order_model['order_id'])
             count = count + 1
             # if count > 10:
@@ -456,25 +464,59 @@ def data_base_update(datas):
             ret = True
         except Exception as e:
             print(e)
+        if (count / 500 == 0):
+            set_task_status(item_id, '执行中 新增:{create}, 更新:{update}'.format(
+                create=create, update=update))
 
+    set_task_status(item_id, '完成 新增:{create}, 更新:{update}'.format(
+        create=create, update=update))
     return ret
 
 
-def orders_pares(orders, custom, settle):
+def orders_pares(item_id, orders, custom, settle):
     orders = pd.read_csv(orders, low_memory=False)
-    #custom_orders = pd.read_excel(custom, low_memory=False)
+    # custom_orders = pd.read_excel(custom, low_memory=False)
     custom_orders = pd.read_excel(custom)
     settle_orders = pd.read_csv(settle, low_memory=False)
     ret = 201
-    if (orders_mul(orders, custom_orders, settle_orders)):
+    if (orders_mul(item_id, orders, custom_orders, settle_orders)):
         ret = 200
     return ret
 
-
-# orders_pares(
-#    'https://app.informat.cn/file/441d8b327b5e4c85a0b58a1d7ec9ec3e_p.csv',
-#    'https://app.informat.cn/file/f824c0464cbb4920aa6ed29735d86684_p.csv',
-#    'https://app.informat.cn/file/ade5d69dcf0442c0875b802980b170f5_p.csv')
+    # str | 团队ID (optional) 1Z4ySU1lUp3Mh8MV 1Z09a100a3c2694ea68634e049066acf10
+    # str | 应用ID (optional) 1Z4y1lUqaPPisC 1Zc50dd09228a34e54aeea521ff12b8952
 
 
-# SELECT  p_id a, order_submit_date b, COUNT(*) c, express_delivery_days d FROM "OrdersModel_orders" GROUP BY p_id, order_submit_date, express_delivery_days
+def set_task_status(item_id, status):
+    headers = {
+        "Content-Type": "application/json; charset=utf-8"}
+    data = {'appId': '1Z4y1lUqaPPisC',
+            'apiKey': '1Zc50dd09228a34e54aeea521ff12b8952'}
+    response = requests.post(
+        'https://app.informat.cn/webapi/v2/app/token', data=json.dumps(data), headers=headers)
+    token = json.loads(response.text)
+
+    url = 'https://app.informat.cn/webapi/v2/table_record/update'
+
+    headers = {"Content-Type": "application/json; charset=utf-8",
+               "Authorization": "Bearer " + token['data']['accessToken']}
+
+    data = {
+        "tableId": "1Z4y4y3FiqWbGrU0",
+        "id": item_id,
+        "rowData": {
+            "1Z4y4y3I0OrTllz9": status,
+        },
+        "updateFields": ["1Z4y4y3I0OrTllz9"]
+    }
+
+    response = requests.post(
+        url, data=json.dumps(data), headers=headers)
+    print(response.text)
+
+    # orders_pares(
+    #    'https://app.informat.cn/file/441d8b327b5e4c85a0b58a1d7ec9ec3e_p.csv',
+    #    'https://app.informat.cn/file/f824c0464cbb4920aa6ed29735d86684_p.csv',
+    #    'https://app.informat.cn/file/ade5d69dcf0442c0875b802980b170f5_p.csv')
+
+    # SELECT  p_id a, order_submit_date b, COUNT(*) c, express_delivery_days d FROM "OrdersModel_orders" GROUP BY p_id, order_submit_date, express_delivery_days
