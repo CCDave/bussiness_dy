@@ -461,7 +461,7 @@ def data_base_update(item_id, datas):
             ret = True
         except Exception as e:
             print(e)
-        if (count / 500 == 0):
+        if (count % 500 == 0):
             set_task_status(item_id, '执行中 新增:{create}, 更新:{update}'.format(
                 create=create, update=update))
 
