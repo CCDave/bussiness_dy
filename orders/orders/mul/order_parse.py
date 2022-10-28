@@ -1,4 +1,5 @@
 from bisect import insort
+from concurrent.futures import process
 import datetime
 from decimal import Decimal
 from doctest import FAIL_FAST
@@ -432,8 +433,10 @@ def data_base_update(item_id, datas):
     create_count = 0
     update_count = 0
     count = 0
-    set_task_status(item_id, '执行中 新增:{create}, 更新:{update}'.format(
-        create=create_count, update=update_count))
+    total_task = len(datas)
+    set_task_status(item_id, '执行中, {count}/{total_task}, 新增:{create},更新:{update}'.
+                    format(count=count, total_task=total_task, create=create_count, update=update_count))
+
     for data in datas:
         try:
             order_model = transOl2dict(data)
@@ -464,11 +467,11 @@ def data_base_update(item_id, datas):
         except Exception as e:
             print(e)
         if (count % 200 == 0):
-            set_task_status(item_id, '执行中 新增:{create}, 更新:{update}'.format(
-                create=create_count, update=update_count))
+            set_task_status(item_id, '执行中, {count}/{total_task}, 新增:{create},更新:{update}'.
+                            format(count=count, total_task=total_task, create=create_count, update=update_count))
 
-    set_task_status(item_id, '完成 新增:{create}, 更新:{update}'.format(
-        create=create_count, update=update_count))
+    set_task_status(item_id, '完成 {count}/{total_task}, 新增:{create},更新:{update}'.
+                    format(count=count, total_task=total_task, create=create_count, update=update_count))
     return ret
 
 
