@@ -133,7 +133,8 @@ DATABASES = {
     {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',    # 数据库引擎
         'NAME': 'postgres',  # 数据库名称
-        'HOST': '121.41.19.35',  # 数据库地址，本机 ip 地址 127.0.0.1
+        # 'HOST': '121.41.19.35',  # 数据库地址，本机 ip 地址 127.0.0.1
+        'HOST': '127.0.0.1',  # 数据库地址，本机 ip 地址 127.0.0.1
         'PORT': 5432,  # 端口
         'USER': 'postgres',  # 数据库用户名
         'PASSWORD': 'SRwHwWnL24kAwsDs',  # 数据库密码
