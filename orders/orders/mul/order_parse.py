@@ -432,6 +432,8 @@ def data_base_update(item_id, datas):
     create_count = 0
     update_count = 0
     count = 0
+    set_task_status(item_id, '执行中 新增:{create}, 更新:{update}'.format(
+        create=create_count, update=update_count))
     for data in datas:
         try:
             order_model = transOl2dict(data)
@@ -461,7 +463,7 @@ def data_base_update(item_id, datas):
             ret = True
         except Exception as e:
             print(e)
-        if (count % 500 == 0):
+        if (count % 200 == 0):
             set_task_status(item_id, '执行中 新增:{create}, 更新:{update}'.format(
                 create=create_count, update=update_count))
 
