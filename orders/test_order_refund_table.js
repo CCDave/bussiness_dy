@@ -159,7 +159,7 @@ let s = collect_s;
 var total_orders = s.sum("子订单编号_数量");
 var no_pay_orders = getValueByPairs(s, "订单阶段", "未付款", "子订单编号_数量");
 
-let refund_list = [];
+let deliver_list = [];
 
 var content = "|渠道|订单数";
 for (let i = 0; i < 20; i++) {
@@ -167,7 +167,7 @@ for (let i = 0; i < 20; i++) {
   if (i == 0) {
     count += no_pay_orders;
   }
-  refund_list.push(count);
+  deliver_list.push(count);
   content += `|${i}天`;
 }
 content += "\n|";
@@ -189,14 +189,14 @@ for (let j = 0; j < 3; j++) {
   for (let i = 0; i < 20; i++) {
     let value = 0;
     if (j == 0) {
-      value = ((refund_list[i] / total_orders) * 100).toFixed(2);
+      value = ((deliver_list[i] / total_orders) * 100).toFixed(2);
     }
     if (j == 1) {
-      total_refund = total_refund + refund_list[i];
+      total_refund = total_refund + deliver_list[i];
       value = ((total_refund / total_orders) * 100).toFixed(2);
     }
     if (j == 2) {
-      value = refund_list[i];
+      value = deliver_list[i];
     }
     content += `${value}|`;
   }
