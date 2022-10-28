@@ -21,7 +21,7 @@ def more(request):
                 if ('item' in get):
                     item_id = get['item']
                 # 处理数据
-                set_task_status(item_id, '开始执行任务')
+                set_task_status(item_id, '0/0,开始执行任务')
                 ret = orders_pares(
                     item_id, get['orders'], get['custom'], get['settle'])
                 ret = 201
@@ -31,7 +31,7 @@ def more(request):
         #    'https://app.informat.cn/file/ade5d69dcf0442c0875b802980b170f5_p.csv')
     except Exception as e:
         tb = e
-        set_task_status(item_id, '执行失败' + e)
+        set_task_status(item_id, '0/0,执行失败' + e)
         return HttpResponse(tb)
     else:
         ret = 200
