@@ -444,10 +444,12 @@ def data_base_update(datas):
                     old, order_model)
                 if update:
                     olds.update(**update_data)
+                print('update:'+order_model['order_id'])
             else:
                 # 创建
                 Orders.objects.update_or_create(
                     order_id=order_model['order_id'], defaults=order_model)
+                print('create:'+order_model['order_id'])
             count = count + 1
             # if count > 10:
             #    break
