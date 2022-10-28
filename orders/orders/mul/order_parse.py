@@ -444,7 +444,7 @@ def data_base_update(datas):
                     old, order_model)
                 if update:
                     olds.update(**update_data)
-                print('update:'+order_model['order_id'])
+                    print('update:'+order_model['order_id'])
             else:
                 # 创建
                 Orders.objects.update_or_create(
