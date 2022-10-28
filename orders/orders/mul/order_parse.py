@@ -434,7 +434,7 @@ def data_base_update(item_id, datas):
     update_count = 0
     count = 0
     total_task = len(datas)
-    set_task_status(item_id, '执行中, {count}/{total_task}, 新增:{create},更新:{update}'.
+    set_task_status(item_id, '[{count}/{total_task}], 新增:{create},更新:{update}'.
                     format(count=count, total_task=total_task, create=create_count, update=update_count))
 
     for data in datas:
@@ -467,10 +467,10 @@ def data_base_update(item_id, datas):
         except Exception as e:
             print(e)
         if (count % 200 == 0):
-            set_task_status(item_id, '执行中, {count}/{total_task}, 新增:{create},更新:{update}'.
+            set_task_status(item_id, '[{count}/{total_task}], 新增:{create},更新:{update}'.
                             format(count=count, total_task=total_task, create=create_count, update=update_count))
 
-    set_task_status(item_id, '完成 {count}/{total_task}, 新增:{create},更新:{update}'.
+    set_task_status(item_id, '[{count}/{total_task}], 新增:{create},更新:{update}'.
                     format(count=count, total_task=total_task, create=create_count, update=update_count))
     return ret
 
