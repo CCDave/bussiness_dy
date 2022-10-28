@@ -11,9 +11,6 @@ from OrdersModel.models import Orders
 import json
 import numpy as np
 
-import swagger_client
-from swagger_client import Configuration
-
 
 def currency_to_float(e):
     if isinstance(e, str):
