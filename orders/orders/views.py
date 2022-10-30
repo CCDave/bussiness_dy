@@ -11,7 +11,12 @@ def hello(request):
 
 
 def more(request):
-    item_id = None
+    # ret = orders_pares('123',
+    #                   'https://app.informat.cn/file/JTdCJTIyaWQlMjIlM0ElMjJiZDFhY2FkY2QzMmM0MDAzOTU0MmY5ZmYyOTNkOGIxYV9wLmNzdiUyMiUyQyUyMm5hbWUlMjIlM0ElMjIxNjY3MTEzMDA1XzNiMjZjODUxMjZhZGM3ZDUyODQyZTUzMjcxOGEwZWVja1dqZVVXUEEuY3N2JTIyJTdE?download=true',
+    #                   'https://app.informat.cn/file/JTdCJTIyaWQlMjIlM0ElMjI2OTcyZmM4NzY4ZDE0ZTJmYjc3MDM0NmVhZDIxNmY3Zl9wLnhsc3glMjIlMkMlMjJuYW1lJTIyJTNBJTIyJUU1JTk0JUFFJUU1JTkwJThFJUU1JThEJTk1LTIwMjItMTAtMzAlMjAwMl81NV80OC54bHN4JTIyJTdE?download=true',
+    #                   'C:\\Users\\jy027\\Downloads\\DL202210301839153607564836.csv')
+    # 'https://app.informat.cn/file/JTdCJTIyaWQlMjIlM0ElMjJlMjQ5N2I0Mjc1ZDk0OGQ2OTNhMjM3Mzc1NWY2Y2UyNF9wLmNzdiUyMiUyQyUyMm5hbWUlMjIlM0ElMjJETDIwMjIxMDMwMTQ1ODM5MTI2NjkzMDIxNi5jc3YlMjIlN0Q=?download=true')
+    # return 201
     try:
         print(request.GET)
         ret = 201
@@ -21,17 +26,14 @@ def more(request):
                 if ('item' in get):
                     item_id = get['item']
                 # 处理数据
-                set_task_status(item_id, '0/0,开始执行任务')
+                set_task_status(item_id, '1/1,开始执行任务')
                 ret = orders_pares(
                     item_id, get['orders'], get['custom'], get['settle'])
                 ret = 201
-        # ret = orders_pares(
-        #    'https://app.informat.cn/file/441d8b327b5e4c85a0b58a1d7ec9ec3e_p.csv',
-        #    'https://app.informat.cn/file/f824c0464cbb4920aa6ed29735d86684_p.csv',
-        #    'https://app.informat.cn/file/ade5d69dcf0442c0875b802980b170f5_p.csv')
+
     except Exception as e:
         tb = e
-        set_task_status(item_id, '0/0,执行失败' + e)
+        set_task_status(item_id, '1/1,执行失败' + e)
         return HttpResponse(tb)
     else:
         ret = 200
