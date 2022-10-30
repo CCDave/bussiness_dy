@@ -188,10 +188,10 @@ def make_order_status_values(item):
     if pd.notna(settle_date) and pd.notna(settle_amount):
         if settle_amount > 0:
             item['r_order_settle_status'] = '已结算'
-            item['r_order_status'] == '已结算'
+            item['r_order_status'] = '已结算'
         else:
             item['r_order_settle_status'] = '反结算'
-            item['r_order_status'] == '反结算'
+            item['r_order_status'] = '反结算'
     elif item['r_order_status'] == '备货中' or item['r_order_status'] == '已发货':
         item['r_order_settle_status'] = '待结算'
     elif item['r_order_status'] == '未付款' or\
