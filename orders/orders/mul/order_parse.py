@@ -444,6 +444,8 @@ def data_base_update(item_id, datas):
     ret = False
     create_count = 0
     update_count = 0
+    error_p_count = 0
+    error_count = 0
     count = 0
     total_task = len(datas)
     set_task_status(item_id, '{count}/{total_task}, 新增:{create},更新:{update}'.
@@ -455,6 +457,7 @@ def data_base_update(item_id, datas):
             # print(order_model)
         except Exception as e:
             print(e)
+            error_p_count = error_p_count + 1
         try:
             olds = Orders.objects.filter(order_id=order_model['order_id'])
             if len(olds) > 0:
@@ -478,12 +481,18 @@ def data_base_update(item_id, datas):
             ret = True
         except Exception as e:
             print(e)
-        if (count % 500 == 0):
-            set_task_status(item_id, '{count}/{total_task}, 新增:{create},更新:{update}'.
-                            format(count=count, total_task=total_task, create=create_count, update=update_count))
+            error_count = error_count + 1
 
-    set_task_status(item_id, '{count}/{total_task}, 新增:{create},更新:{update}'.
-                    format(count=count, total_task=total_task, create=create_count, update=update_count))
+        if (count % 500 == 0):
+            set_task_status(item_id, '{count}/{total_task}, 新增:{create},更新:{update},P:{error_p_count},E:{error_count}'.
+                            format(count=count, total_task=total_task, create=create_count,
+                                   update=update_count, error_p_count=error_p_count,
+                                   error_count=error_count))
+
+    set_task_status(item_id, '{count}/{total_task}, 新增:{create},更新:{update},P:{error_p_count},E:{error_count}'.
+                    format(count=count, total_task=total_task, create=create_count,
+                           update=update_count, error_p_count=error_p_count,
+                           error_count=error_count))
     return ret
 
 

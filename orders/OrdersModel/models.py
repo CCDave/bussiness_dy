@@ -335,7 +335,7 @@ class Orders(models.Model):
         r_order_status = {'未知': 0,
                           '备货中': 1, '已发货': 2, '发货前退款': 3, '发货后退款': 4,
                           '已结算': 5, '反结算': 6, '未付款': 10, }
-        # 已结算 反结算 待结算 退货
+        # 已结算 反结算 待结算 退货 未知
         r_order_settle_status = {
             '未知': -1, '待结算': 0, '退单': 1, '已结算': 2, '反结算': 3}
         for com in default_compare:
