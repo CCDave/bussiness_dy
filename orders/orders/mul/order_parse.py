@@ -455,12 +455,12 @@ def data_base_update(item_id, datas):
             if len(olds) > 0:
                 # 判断是否需要更新
                 old = olds[0]
-                update, update_data = old._is_module_need_update(
+                update, update_data, update_old = old._is_module_need_update(
                     old, order_model)
                 if update:
                     olds.update(**update_data)
                     update_count = update_count + 1
-                    print('update:'+order_model['order_id'])
+                    print('update:' + order_model['order_id'])
             else:
                 # 创建
                 Orders.objects.update_or_create(

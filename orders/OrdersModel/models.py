@@ -247,6 +247,7 @@ class Orders(models.Model):
     def _is_module_need_update(self, old, new):
         ret = False
         updates = {}
+        olds = {}
         default_compare = ['name',
                            'p_id',
                            'p_count',
@@ -343,6 +344,7 @@ class Orders(models.Model):
                 new_item = new[com]
                 if pd.isna(old_item) and pd.notna(new_item):
                     updates[com] = new_item
+                    olds[com] = old_item
                     ret = True
                     continue
                 elif pd.isna(new_item) and pd.notna(old_item):
@@ -355,12 +357,12 @@ class Orders(models.Model):
                              r_order_settle_status[new_item] > r_order_settle_status[old_item]):
                             ret = True
                             updates[com] = new_item
-                        else:
-                            print('no update')
+                            olds[com] = old_item
                     else:
                         ret = True
                         updates[com] = new_item
+                        olds[com] = old_item
             except Exception as e:
                 print(e)
 
-        return ret, updates
+        return ret, updates, olds
