@@ -333,27 +333,34 @@ class Orders(models.Model):
         # 未付款 发货前退款 发货后退款 已发货 备货中 已结算 反结算
         r_order_status = {'未知': 0,
                           '备货中': 1, '已发货': 2, '发货前退款': 3, '发货后退款': 4,
-                          '已结算': 2, '反结算': 3, '未付款': 10, }
+                          '已结算': 5, '反结算': 6, '未付款': 10, }
         # 已结算 反结算 待结算 退货
         r_order_settle_status = {
-            '未知': -1, '待结算': 0, '退货': 1, '已结算': 2, '反结算': 3}
+            '未知': -1, '待结算': 0, '退单': 1, '已结算': 2, '反结算': 3}
         for com in default_compare:
-            old_item = getattr(old, com)
-            new_item = new[com]
-            if pd.isna(old_item) and pd.notna(new_item):
-                updates[com] = new_item
-                ret = True
-                continue
-            elif pd.isna(new_item) and pd.notna(old_item):
-                continue
-            elif new_item != old_item:
-                if com == 'r_order_status' and r_order_status[new] > r_order_status[old]:
-                    ret = True
+            try:
+                old_item = getattr(old, com)
+                new_item = new[com]
+                if pd.isna(old_item) and pd.notna(new_item):
                     updates[com] = new_item
-                elif com == 'r_order_settle_status' and r_order_settle_status[new] > r_order_settle_status[old]:
                     ret = True
-                    updates[com] = new_item
-                else:
-                    ret = True
-                    updates[com] = new_item
+                    continue
+                elif pd.isna(new_item) and pd.notna(old_item):
+                    continue
+                elif new_item != old_item:
+                    if com == 'r_order_status' or com == 'r_order_settle_status':
+                        if (com == 'r_order_status' and
+                            r_order_status[new_item] > r_order_status[old_item]) or\
+                            (com == 'r_order_settle_status' and
+                             r_order_settle_status[new_item] > r_order_settle_status[old_item]):
+                            ret = True
+                            updates[com] = new_item
+                        else:
+                            print('no update')
+                    else:
+                        ret = True
+                        updates[com] = new_item
+            except Exception as e:
+                print(e)
+
         return ret, updates
