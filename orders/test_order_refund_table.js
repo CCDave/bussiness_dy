@@ -158,32 +158,29 @@ const collect_s = collect(datas);
 let s = collect_s;
 var total_orders = s.sum("子订单编号_数量");
 var no_pay_orders = getValueByPairs(s, "订单阶段", "未付款", "子订单编号_数量");
-
+var total_pay = total_orders - no_pay_orders;
 let deliver_list = [];
 
-var content = "|渠道|订单数";
+var content = "|渠道|订单数|付款数";
 for (let i = 0; i < 20; i++) {
   let count = getValueByPairs(s, "几天退款", i, "子订单编号_数量");
-  if (i == 0) {
-    count += no_pay_orders;
-  }
   deliver_list.push(count);
   content += `|${i}天`;
 }
 content += "\n|";
-for (let i = 0; i < 22; i++) {
+for (let i = 0; i < 23; i++) {
   content += "---|";
 }
 content += "\n";
 for (let j = 0; j < 3; j++) {
   if (j == 0) {
-    content += `|退货率|${total_orders}|`;
+    content += `|退货率|${total_orders}|${total_pay}|`;
   }
   if (j == 1) {
-    content += `|总退货率|${total_orders}|`;
+    content += `|总退货率|${total_orders}|${total_pay}|`;
   }
   if (j == 2) {
-    content += `|退货数|${total_orders}|`;
+    content += `|退货数|${total_orders}|${total_pay}|`;
   }
   let total_refund = 0;
   for (let i = 0; i < 20; i++) {

@@ -189,14 +189,15 @@ var prepare_amount = getValueByPairs(
   "备货中",
   "订单应付金额_求和"
 );
-var total_refund = refund_after + refund_before + no_pay_orders;
+var pay_count = total_orders - no_pay_orders;
+var total_refund = refund_after + refund_before;
 var waite_settle = delivery + prepare;
 var waite_settle_mount = delivery_amount + prepare_amount;
 var pay_percent = (1 - no_pay_orders / total_orders).toFixed(2);
-var refund_percent = (total_refund / total_orders).toFixed(2);
-var waite_settle_percent = (waite_settle / total_orders).toFixed(2);
-var before_percent = (refund_before / total_orders).toFixed(2);
-var after_percent = (refund_after / total_orders).toFixed(2);
+var refund_percent = (total_refund / pay_count).toFixed(2);
+var waite_settle_percent = (waite_settle / pay_count).toFixed(2);
+var before_percent = (refund_before / pay_count).toFixed(2);
+var after_percent = (refund_after / pay_count).toFixed(2);
 var content =
   "|渠道|订单数|未付款|付款率|发前退款|发前退款率|发后退款|发后退款率|未支付/退款|退款率|已发货|备货中|待结算|待结算比例|待结算金额\n" +
   "|---|------|----- |-----|-------|---------|--------|---------|----------|------|-----|------|-----|--------|--------| \n";

@@ -113,7 +113,7 @@ if (supply != null) {
 
 let query_set = {
   useFieldName: true,
-  groupByFieldList: [ids.express_delivery_days],
+  groupByFieldList: [ids.express_delivery_days, ids.r_order_status],
   aggregationQueryList: [
     { field: ids.order_id, func: "count", distinct: false },
     { field: ids.p_count, func: "count", distinct: false },
@@ -157,10 +157,11 @@ function getValueByPairs(collect, c_key, c_value, value) {
 const collect_s = collect(datas);
 let s = collect_s;
 var total_orders = s.sum("子订单编号_数量");
-
+var no_pay_orders = getValueByPairs(s, "订单阶段", "未付款", "子订单编号_数量");
+var total_pay = total_orders - no_pay_orders;
 let refund_list = [];
 
-var content = "|渠道|订单数";
+var content = "|渠道|付款数";
 for (let i = 0; i < 20; i++) {
   let count = getValueByPairs(s, "几天发货", i, "子订单编号_数量");
   refund_list.push(count);
@@ -173,23 +174,23 @@ for (let i = 0; i < 22; i++) {
 content += "\n";
 for (let j = 0; j < 3; j++) {
   if (j == 0) {
-    content += `|发货率|${total_orders}|`;
+    content += `|发货率|${total_pay}|`;
   }
   if (j == 1) {
-    content += `|总发货率|${total_orders}|`;
+    content += `|总发货率|${total_pay}|`;
   }
   if (j == 2) {
-    content += `|发货数|${total_orders}|`;
+    content += `|发货数|${total_pay}|`;
   }
   let total_deliver = 0;
   for (let i = 0; i < 20; i++) {
     let value = 0;
     if (j == 0) {
-      value = ((refund_list[i] / total_orders) * 100).toFixed(2);
+      value = ((refund_list[i] / total_pay) * 100).toFixed(2);
     }
     if (j == 1) {
       total_deliver = total_deliver + refund_list[i];
-      value = ((total_deliver / total_orders) * 100).toFixed(2);
+      value = ((total_deliver / total_pay) * 100).toFixed(2);
     }
     if (j == 2) {
       value = refund_list[i];
