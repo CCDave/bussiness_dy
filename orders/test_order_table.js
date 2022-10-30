@@ -166,12 +166,14 @@ function getValues(collect, c_key, c_vale, p_total) {
     percent: 0,
   };
   obj.order_count = getValueByPairs(collect, c_key, c_vale, "子订单编号_数量");
+
   obj.need_pay_mount = getValueByPairs(
     collect,
     c_key,
     c_vale,
     "订单应付金额_求和"
   );
+
   obj.p_count = getValueByPairs(collect, c_key, c_vale, "商品数量_求和");
   obj.settle_amount = getValueByPairs(collect, c_key, c_vale, "结算金额_求和");
   obj.percent = ((obj.order_count / p_total) * 100).toFixed(2);
@@ -181,6 +183,11 @@ const collect_s = collect(datas);
 let s = collect_s;
 var total_orders = s.sum("子订单编号_数量");
 
+var total_amount = 0;
+datas.filter(
+  (f) => (total_amount += f["订单应付金额_求和"] ? f["订单应付金额_求和"] : 0)
+);
+total_amount = total_amount.toFixed(2);
 var no_pay_orders = getValues(s, "订单阶段", "未付款", total_orders);
 
 var pay_count = total_orders - no_pay_orders.order_count;
@@ -188,6 +195,7 @@ var pay_percent = (
   100 -
   (no_pay_orders.order_count / total_orders) * 100
 ).toFixed(2);
+var pay_amount = total_amount;
 
 var refund_before = getValues(s, "订单阶段", "发货前退款", pay_count);
 var refund_after = getValues(s, "订单阶段", "发货后退款", pay_count);
@@ -215,13 +223,13 @@ datas.filter(
 );
 
 var content =
-  "|渠道|订单|付款|付款率|前退|前退率|后退|\
+  "|渠道|订单|付款|付款率|付款额|前退|前退率|后退|\
   后退率|退款|退款率|发货|发货件|发货率|发货额|\
   备货|备货件|备货率|备货额|待结算|待结件|待结算率|\
   待结算额|结算|结算件|结算率|结算额|反结算|反结算件|\
   反结算率|反结算额|平台服务费|\n" +
-  "|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|\n";
-content += `|总数| ${total_orders}|${pay_count}|${pay_percent}|\
+  "|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|\n";
+content += `|总数| ${total_orders}|${pay_count}|${pay_percent}|${pay_amount}|\
 ${refund_before.order_count}|${refund_before.percent}|\
 ${refund_after.order_count}|${refund_after.percent}|\
 ${total_refund}|${total_refund_percent}|\
