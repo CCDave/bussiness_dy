@@ -290,20 +290,20 @@ def transOl2dict(df):
     obj['settle_date'] = trans_time(df['结算日期'])
     obj['settle_days'] = trans_number(df['几天结算'])
 
-    obj['total_income'] = trans_number(df['收入合计'])
+    obj['total_income'] = None  # trans_number(df['收入合计'])
     obj['platform_service_amount'] = trans_number(df['平台服务费'])
-    obj['platform_subsidy'] = trans_number(df['平台补贴'])
-    obj['partner_subsidy'] = trans_number(df['达人补贴'])
-    obj['dy_pay_subsidy'] = trans_number(df['抖音支付补贴'])
-    obj['dy_month_subsidy'] = trans_number(df['抖音月付营销补贴'])
-    obj['user_total_pay'] = trans_number(df['用户实付'])
+    obj['platform_subsidy'] = None  # trans_number(df['平台补贴'])
+    obj['partner_subsidy'] = None  # trans_number(df['达人补贴'])
+    obj['dy_pay_subsidy'] = None  # trans_number(df['抖音支付补贴'])
+    obj['dy_month_subsidy'] = None  # trans_number(df['抖音月付营销补贴'])
+    obj['user_total_pay'] = None  # trans_number(df['用户实付'])
     obj['commission'] = trans_number(df['佣金'])
-    obj['channel_commission'] = trans_number(df['渠道分成'])
-    obj['investment_commission'] = trans_number(df['招商服务费'])
-    obj['live_3part_commission'] = trans_number(df['直播间站外推广'])
-    obj['other_commission'] = trans_number(df['其他分成'])
-    obj['other_commission_desc'] = trans_string(df['其他分成说明'])
-    obj['total_expend'] = trans_number(df['支出合计'])
+    obj['channel_commission'] = None  # trans_number(df['渠道分成'])
+    obj['investment_commission'] = None  # trans_number(df['招商服务费'])
+    obj['live_3part_commission'] = None  # trans_number(df['直播间站外推广'])
+    obj['other_commission'] = None  # trans_number(df['其他分成'])
+    obj['other_commission_desc'] = None  # rans_string(df['其他分成说明'])
+    obj['total_expend'] = None  # trans_number(df['支出合计'])
     obj['remark'] = trans_string(df['备注'])
     obj = make_order_status_values(obj)
     return obj
@@ -362,7 +362,12 @@ def orders_mul(item_id, orders_from_file, orders_return_from_file, orders_settle
     orders_all["几天退款"] = orders_all["售后申请日期"] - \
         orders_all["订单提交日期"]
     # 处理结算表
-    orders_settle_from_file = orders_settle_from_file.drop(index=0)
+    # 判断结算订单类型
+    if '动账金额' in orders_settle_from_file.columns:
+        orders_settle_from_file['结算时间'] = orders_settle_from_file['动账时间']
+        orders_settle_from_file['结算金额'] = orders_settle_from_file['动账金额']
+    else:
+        orders_settle_from_file = orders_settle_from_file.drop(index=0)
 
     orders_settle_from_file['主订单编号'] = orders_settle_from_file['订单号']
     orders_settle_from_file['子订单编号'] = orders_settle_from_file['子订单号']
