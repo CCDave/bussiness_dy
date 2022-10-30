@@ -234,7 +234,7 @@ class Orders(models.Model):
     # '关联记录'
     order_link = models.CharField(null=True, max_length=128, default='null')
 
-    # 未付款 退款 发货前退款 发货后退款 已发货 备货中
+    # 未付款 退款 发货前退款 发货后退款 已发货 备货中 已结算 反结算
     r_order_status = models.CharField(
         null=True, max_length=128, default='null')
     # 已结算 反结算 待结算 退货
@@ -330,6 +330,13 @@ class Orders(models.Model):
                            'r_order_status',
                            'r_order_settle_status']
 
+        # 未付款 发货前退款 发货后退款 已发货 备货中 已结算 反结算
+        r_order_status = {'未知': 0,
+                          '备货中': 1, '已发货': 2, '发货前退款': 3, '发货后退款': 4,
+                          '已结算': 2, '反结算': 3, '未付款': 10, }
+        # 已结算 反结算 待结算 退货
+        r_order_settle_status = {
+            '未知': -1, '待结算': 0, '退货': 1, '已结算': 2, '反结算': 3}
         for com in default_compare:
             old_item = getattr(old, com)
             new_item = new[com]
@@ -340,6 +347,13 @@ class Orders(models.Model):
             elif pd.isna(new_item) and pd.notna(old_item):
                 continue
             elif new_item != old_item:
-                ret = True
-                updates[com] = new_item
+                if com == 'r_order_status' and r_order_status[new] > r_order_status[old]:
+                    ret = True
+                    updates[com] = new_item
+                elif com == 'r_order_settle_status' and r_order_settle_status[new] > r_order_settle_status[old]:
+                    ret = True
+                    updates[com] = new_item
+                else:
+                    ret = True
+                    updates[com] = new_item
         return ret, updates

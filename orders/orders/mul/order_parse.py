@@ -184,6 +184,10 @@ def make_order_status_values(item):
             item['r_order_status'] = '未知'
     elif order_status == '备货中':
         item['r_order_status'] = '备货中'
+    elif order_status == '待发货':
+        item['r_order_status'] = '备货中'
+    else:
+        item['r_order_status'] = '未知'
 
     if pd.notna(settle_date) and pd.notna(settle_amount):
         if settle_amount > 0:
@@ -192,7 +196,8 @@ def make_order_status_values(item):
         else:
             item['r_order_settle_status'] = '反结算'
             item['r_order_status'] = '反结算'
-    elif item['r_order_status'] == '备货中' or item['r_order_status'] == '已发货':
+    elif item['r_order_status'] == '备货中' or \
+            item['r_order_status'] == '已发货':
         item['r_order_settle_status'] = '待结算'
     elif item['r_order_status'] == '未付款' or\
             item['r_order_status'] == '发货前退款' or\
