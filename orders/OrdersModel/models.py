@@ -339,30 +339,30 @@ class Orders(models.Model):
         r_order_settle_status = {
             '未知': -1, '待结算': 0, '退单': 1, '已结算': 2, '反结算': 3}
         for com in default_compare:
-            try:
-                old_item = getattr(old, com)
-                new_item = new[com]
-                if pd.isna(old_item) and pd.notna(new_item):
-                    updates[com] = new_item
-                    olds[com] = old_item
-                    ret = True
-                    continue
-                elif pd.isna(new_item) and pd.notna(old_item):
-                    continue
-                elif new_item != old_item:
-                    if com == 'r_order_status' or com == 'r_order_settle_status':
-                        if (com == 'r_order_status' and
-                            r_order_status[new_item] > r_order_status[old_item]) or\
-                            (com == 'r_order_settle_status' and
-                             r_order_settle_status[new_item] > r_order_settle_status[old_item]):
-                            ret = True
-                            updates[com] = new_item
-                            olds[com] = old_item
-                    else:
+            # try:
+            old_item = getattr(old, com)
+            new_item = new[com]
+            if pd.isna(old_item) and pd.notna(new_item):
+                updates[com] = new_item
+                olds[com] = old_item
+                ret = True
+                continue
+            elif pd.isna(new_item) and pd.notna(old_item):
+                continue
+            elif new_item != old_item:
+                if com == 'r_order_status' or com == 'r_order_settle_status':
+                    if (com == 'r_order_status' and
+                        r_order_status[new_item] > r_order_status[old_item]) or\
+                        (com == 'r_order_settle_status' and
+                            r_order_settle_status[new_item] > r_order_settle_status[old_item]):
                         ret = True
                         updates[com] = new_item
                         olds[com] = old_item
-            except Exception as e:
-                print(e)
+                else:
+                    ret = True
+                    updates[com] = new_item
+                    olds[com] = old_item
+            # except Exception as e:
+            #    print(e)
 
         return ret, updates, olds
