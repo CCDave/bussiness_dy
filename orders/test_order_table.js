@@ -222,19 +222,37 @@ datas.filter(
     (platform_service_amount += f["平台服务费_求和"] ? f["平台服务费_求和"] : 0)
 );
 
+var deliver_total =
+  delivery.order_count +
+  refund_after.order_count +
+  waite_settle +
+  settle.order_count +
+  r_settle.order_count;
+var deliver_p_count =
+  delivery.p_count +
+  refund_after.p_count +
+  waite_settle_p_count +
+  settle.p_count +
+  r_settle.p_count;
+var deliver_percent = (deliver_total / pay_count).toFixed(2);
+
 var content =
-  "|渠道|订单|付款|付款率|付款额|前退|前退率|后退|\
-  后退率|退款|退款率|发货|发货件|发货率|发货额|\
-  备货|备货件|备货率|备货额|待结算|待结件|待结算率|\
-  待结算额|结算|结算件|结算率|结算额|反结算|反结算件|\
-  反结算率|反结算额|平台服务费|\n" +
-  "|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|\n";
+  "|渠道|订单|付款|付款率|付款额|\
+  前退|前退率|后退|后退率|\
+  退款|退款率|发途|发途件|发途率|发途额|\
+  备货|备货件|备货率|备货额|\
+  总发|总发件|总发率|\
+  待结算|待结件|待结算率|待结算额|\
+  结算|结算件|结算率|结算额|\
+  反结算|反结算件|反结算率|反结算额|平台服务费|\n" +
+  "|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|\n";
 content += `|总数| ${total_orders}|${pay_count}|${pay_percent}|${pay_amount}|\
 ${refund_before.order_count}|${refund_before.percent}|\
 ${refund_after.order_count}|${refund_after.percent}|\
 ${total_refund}|${total_refund_percent}|\
 ${delivery.order_count}|${delivery.p_count} |${delivery.percent} |${delivery.need_pay_mount} |\
 ${prepare.order_count}|${prepare.p_count} |${prepare.percent} |${prepare.need_pay_mount} |\
+${deliver_total}|${deliver_p_count} |${deliver_percent} |\
 ${waite_settle}|${waite_settle_p_count} |${waite_settle_percent} |${waite_settle_mount} |\
 ${settle.order_count}|${settle.p_count} |${settle.percent} |${settle.need_pay_mount} |\
 ${r_settle.order_count}|${r_settle.p_count} |${r_settle.percent} |${r_settle.need_pay_mount} |\
