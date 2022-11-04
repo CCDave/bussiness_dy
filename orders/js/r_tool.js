@@ -1,25 +1,22 @@
-const collect = load("collect.js");
 (function tool() {
-  const tool = function () {
-    this.array_sum_by_condition = function (collect, conditions, sum_value) {
-      return collect.sum((product) => {
-        var hit = true;
-        if (conditions && conditions.length > 0) {
-          for (var key in conditions) {
-            if (product[key] != conditions[key]) {
-              hit = false;
-              break;
-            }
+  function array_sum_by_condition(c, conditions, sum_value) {
+    return c.sum((product) => {
+      var hit = true;
+      if (conditions != null) {
+        for (var key in conditions) {
+          if (product[key] == undefined || product[key] != conditions[key]) {
+            hit = false;
+            break;
           }
         }
-        if (hit) {
-          return product[sum_value] ? product[sum_value] : 0;
-        } else {
-          return 0;
-        }
-      });
-    };
-  };
+      }
+      if (hit) {
+        return product[sum_value] ? product[sum_value] : 0;
+      } else {
+        return 0;
+      }
+    });
+  }
 
   const DB_BASE = function () {
     this.db_url = "jdbc:postgresql://121.41.19.35:5432/postgres";
@@ -68,27 +65,42 @@ const collect = load("collect.js");
       this.table = table;
       this.table_id = table.id;
       var field_list = informat.table.getFieldList(table.id);
+      this.field_list = field_list;
+
       for (let i = 0; i < field_name_list.length; i++) {
         var name = field_name_list[i];
-        var field_id = this.get_field(field_list, name);
-        if (name != null && field_id != null) {
-          this.ids[name] = field_id;
+        var field = this.get_field(field_list, name);
+        if (name != null && field != null) {
+          this.ids[name] = field.id;
           ret = true;
+        }
+      }
+      console.log({
+        table: this.table,
+        table_id: this.table_id,
+        ids: this.ids,
+      });
+      return ret;
+    };
+
+    this.get_field_id_list = function (name_list) {
+      var ret = [];
+      for (var i = 0; i < name_list.length; i++) {
+        var field = this.get_field(name_list[i]);
+        if (field) {
+          ret.push(field.id);
         }
       }
       return ret;
     };
-    this.get_field_list = function (name_list) {
-      var ret = [];
-      for (var i = 0; i < name_list; i++) {
-        var field = this.get_field(this.field_list, name_list[i]);
-        if (field) {
-          ret.push(field);
-        }
-      }
+
+    this.get_field = function (name) {
+      return this.field_list.find((f) => f.name == name);
     };
-    this.get_field = function (field_list, name) {
-      return field_list.find((f) => f.name == name);
+
+    this.get_field_id = function (name) {
+      var field = this.field_list.find((f) => f.name == name);
+      return field.id;
     };
 
     this.insert = function (bean) {
@@ -123,14 +135,14 @@ const collect = load("collect.js");
 
       if (product_id != null) {
         filter.conditionList.push({
-          fieldId: ids.p_id,
+          fieldId: this.table.get_field_id("商品ID"),
           opt: "eq",
           value: product_id,
         });
       }
       if (full_sku_code != null) {
         filter.conditionList.push({
-          fieldId: ids.s_sku_finish_code,
+          fieldId: this.table.get_field_id("SKU编码"),
           opt: "contains",
           value: full_sku_code,
         });
@@ -138,12 +150,12 @@ const collect = load("collect.js");
 
       if (start_date != null && end_date != null) {
         filter.conditionList.push({
-          fieldId: ids.order_submit_date,
+          fieldId: this.table.get_field_id("订单提交日期"),
           opt: "ge",
           value: start_date,
         });
         filter.conditionList.push({
-          fieldId: ids.order_submit_date,
+          fieldId: this.table.get_field_id("订单提交日期"),
           opt: "le",
           value: end_date,
         });
@@ -152,14 +164,14 @@ const collect = load("collect.js");
         (start_date == null && end_date != null)
       ) {
         filter.conditionList.push({
-          fieldId: ids.order_submit_date,
+          fieldId: this.table.get_field_id("订单提交日期"),
           opt: "eq",
           value: start_date == null ? end_date : start_date,
         });
       }
       if (supply != null) {
         filter.conditionList.push({
-          fieldId: ids.s_supplier,
+          fieldId: this.table.get_field_id("供应商"),
           opt: "eq",
           value: supply,
         });
@@ -177,12 +189,31 @@ const collect = load("collect.js");
       content += "|content                  | String | 是   | 富文本原始内容 |";
       return `参数：${JSON.stringify(params)}` + "<br>\n\n" + content;
     };
-    this.convert_array_to_table_txt = function (data) {};
+    this.convert_array_to_table_txt = function (data) {
+      var content = "|";
+      var split_str = "|";
+
+      for (var i = 0; i < this.headers.length; i++) {
+        content += `${this.headers[i]} |`;
+        split_str += "-|";
+      }
+      content += "\n";
+      content += split_str;
+      content += "\n";
+      for (var j = 0; j < this.index.length; j++) {
+        content += `|${this.index[j]}|`;
+        for (var i = 0; i < data.length; i++) {
+          content += `${data[i][j]}|`;
+        }
+        content += "\n";
+      }
+      return content;
+    };
   };
   return {
     dashboard_tool: dashboard_tool,
     table: table,
     DB_BASE: DB_BASE,
-    tool: tool,
+    array_sum_by_condition: array_sum_by_condition,
   };
 })();
