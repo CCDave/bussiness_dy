@@ -1,15 +1,11 @@
-const collect = load("collect.js");
+const logic = load("logic.js");
 informat.plugin = {
   api: [
     {
       id: "testApi",
       action: (ctx) => {
-        const result = informat.call.api({
-          id: "testApi",
-          appId: "1Z4y1lUqaPPisC",
-          parameters: { p1: 1 },
-          query: { query1: "1" },
-        });
+        console.log(ctx);
+        return logic.init_refund_table_data();
       },
     },
   ],
