@@ -11,12 +11,12 @@ def hello(request):
 
 
 def more(request):
-    # ret = orders_pares('123',
-    #                   'https://app.informat.cn/file/JTdCJTIyaWQlMjIlM0ElMjJiZDFhY2FkY2QzMmM0MDAzOTU0MmY5ZmYyOTNkOGIxYV9wLmNzdiUyMiUyQyUyMm5hbWUlMjIlM0ElMjIxNjY3MTEzMDA1XzNiMjZjODUxMjZhZGM3ZDUyODQyZTUzMjcxOGEwZWVja1dqZVVXUEEuY3N2JTIyJTdE?download=true',
-    #                   'https://app.informat.cn/file/JTdCJTIyaWQlMjIlM0ElMjI2OTcyZmM4NzY4ZDE0ZTJmYjc3MDM0NmVhZDIxNmY3Zl9wLnhsc3glMjIlMkMlMjJuYW1lJTIyJTNBJTIyJUU1JTk0JUFFJUU1JTkwJThFJUU1JThEJTk1LTIwMjItMTAtMzAlMjAwMl81NV80OC54bHN4JTIyJTdE?download=true',
-    #                   'C:\\Users\\jy027\\Downloads\\DL202210301839153607564836.csv')
+    ret = orders_pares('123',
+                       'https://app.informat.cn/file/JTdCJTIyaWQlMjIlM0ElMjJiZDFhY2FkY2QzMmM0MDAzOTU0MmY5ZmYyOTNkOGIxYV9wLmNzdiUyMiUyQyUyMm5hbWUlMjIlM0ElMjIxNjY3MTEzMDA1XzNiMjZjODUxMjZhZGM3ZDUyODQyZTUzMjcxOGEwZWVja1dqZVVXUEEuY3N2JTIyJTdE?download=true',
+                       'https://app.informat.cn/file/JTdCJTIyaWQlMjIlM0ElMjI2OTcyZmM4NzY4ZDE0ZTJmYjc3MDM0NmVhZDIxNmY3Zl9wLnhsc3glMjIlMkMlMjJuYW1lJTIyJTNBJTIyJUU1JTk0JUFFJUU1JTkwJThFJUU1JThEJTk1LTIwMjItMTAtMzAlMjAwMl81NV80OC54bHN4JTIyJTdE?download=true',
+                       'C:\\Users\\jy027\\Downloads\\DL202210301834031469272617.csv')
     # 'https://app.informat.cn/file/JTdCJTIyaWQlMjIlM0ElMjJlMjQ5N2I0Mjc1ZDk0OGQ2OTNhMjM3Mzc1NWY2Y2UyNF9wLmNzdiUyMiUyQyUyMm5hbWUlMjIlM0ElMjJETDIwMjIxMDMwMTQ1ODM5MTI2NjkzMDIxNi5jc3YlMjIlN0Q=?download=true')
-    # return 201
+    return 201
     try:
         print(request.GET)
         ret = 201
