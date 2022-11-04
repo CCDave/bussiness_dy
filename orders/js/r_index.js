@@ -2,10 +2,10 @@ const logic = load("logic.js");
 informat.plugin = {
   api: [
     {
-      id: "testApi",
+      id: "refund_table_data",
       action: (ctx) => {
-        console.log(ctx);
-        return logic.init_refund_table_data();
+        console.log(ctx.parameters);
+        return logic.init_refund_table_data(ctx.parameters);
       },
     },
   ],

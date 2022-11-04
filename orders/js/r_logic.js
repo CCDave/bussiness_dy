@@ -2,13 +2,13 @@ const tool = load("tool.js");
 const collect = load("collect.js");
 
 (function logic() {
-  function init_refund_table_data(
-    product_id,
-    full_sku_code,
-    start_date,
-    end_date,
-    supply
-  ) {
+  function init_refund_table_data(params) {
+    let product_id = params["product_id"];
+    let full_sku_code = params["full_sku_code"];
+    let start_date = params["start_date"];
+    let end_date = params["end_date"];
+    let supply = params["supply"];
+
     var table = new tool.table("订单表-原始表");
     table.init_table([
       "子订单编号",
@@ -150,10 +150,8 @@ const collect = load("collect.js");
             ).toFixed(2);
           }
         }
-        console.log({ i, j, dash_data });
       }
     }
-    console.log({ dash_data });
     return dash_board_refund.convert_array_to_table_txt(dash_data);
   }
   return {
