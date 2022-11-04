@@ -10,7 +10,6 @@ function show_log(params) {
   dashboard.setMarkdownOption(
     `参数：${JSON.stringify(params)}` + "<br>\n\n" + content
   );
-  //console.log(params);
 }
 const ids = {
   table_id: "1Z4y4y3GGhYTuh1F", // 计算项
@@ -119,9 +118,11 @@ let query_set = {
     { field: ids.p_count, func: "count", distinct: false },
   ],
 };
+
 if (filter.conditionList.length > 0) {
   query_set.filter = filter;
 }
+
 var resp = informat.table.query(ids.table_id, query_set);
 // 总订单数
 // 未支付数
